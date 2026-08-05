@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Journey</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Panel 1 — Journey summary. Rendered from state by app.js. -->
+  <header id="summary-panel">
+    <h1>AI Journey</h1>
+    <p id="purpose">Becoming an AI engineer</p>
+    <div id="summary-figures"></div>
+  </header>
+
+  <main>
+
+    <!-- Panel 2 — Projects -->
+    <section id="projects-panel">
+      <div class="panel-header">
+        <h2>Projects</h2>
+        <button id="add-project-button" type="button">Add project</button>
+      </div>
+      <div id="projects-list"></div>
+    </section>
+
+    <!-- Panel 3 — Curriculum -->
+    <section id="curriculum-panel">
+      <div class="panel-header">
+        <h2>Curriculum</h2>
+        <span id="curriculum-summary"></span>
+      </div>
+      <div id="modules-list"></div>
+    </section>
+
+    <!-- Panel 4 — Weekly schedule. Static reference content. -->
+    <section id="schedule-panel">
+      <details>
+        <summary><h2>Weekly schedule</h2></summary>
+        <div class="schedule-grid">
+          <div>
+            <h3>Monday to Friday</h3>
+            <dl>
+              <dt>06:00 – 07:30</dt>
+              <dd>Deep block. The hardest material of the month goes here.</dd>
+              <dt>19:30 – 20:00</dt>
+              <dd>Light review, three days a week. Reading, not building.</dd>
+            </dl>
+          </div>
+          <div>
+            <h3>Weekend</h3>
+            <dl>
+              <dt>Saturday 09:00 – 13:00</dt>
+              <dd>Build session. The most important four hours of the fortnight.</dd>
+              <dt>Sunday 09:00 – 11:00</dt>
+              <dd>Commit, document, note what got stuck.</dd>
+            </dl>
+          </div>
+        </div>
+      </details>
+    </section>
+
+  </main>
+
+  <footer id="data-panel">
+    <button id="export-button" type="button">Export data</button>
+    <button id="import-button" type="button">Import data</button>
+    <input type="file" id="import-file" accept="application/json" hidden>
+  </footer>
+
+  <!-- Session logging. Opened from a resource or project row. -->
+  <dialog id="session-dialog">
+    <form id="session-form" method="dialog">
+      <h2 id="session-dialog-title">Log a session</h2>
+
+      <label for="session-date">Date</label>
+      <input type="date" id="session-date" required>
+
+      <label for="session-minutes">Minutes</label>
+      <input type="number" id="session-minutes" min="1" max="1440" required>
+
+      <div id="session-rating-field">
+        <label for="session-rating">Usefulness</label>
+        <select id="session-rating">
+          <option value="">Not rated</option>
+          <option value="1">1 — no value</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 — moved me forward</option>
+        </select>
+      </div>
+
+      <label for="session-notes">Notes</label>
+      <textarea id="session-notes" rows="2"></textarea>
+
+      <label for="session-blocker">What blocked me</label>
+      <textarea id="session-blocker" rows="2"></textarea>
+
+      <div class="dialog-actions">
+        <button type="button" id="session-cancel">Cancel</button>
+        <button type="submit" id="session-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Adding a project. -->
+  <dialog id="project-dialog">
+    <form id="project-form" method="dialog">
+      <h2>Add a project</h2>
+
+      <label for="project-name">Name</label>
+      <input type="text" id="project-name" required>
+
+      <label for="project-description">Description</label>
+      <textarea id="project-description" rows="2"></textarea>
+
+      <label for="project-url">Link</label>
+      <input type="url" id="project-url" placeholder="https://">
+
+      <div class="dialog-actions">
+        <button type="button" id="project-cancel">Cancel</button>
+        <button type="submit" id="project-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="modules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
