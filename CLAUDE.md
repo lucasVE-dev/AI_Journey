@@ -56,6 +56,9 @@ Four source files. Not one more until splitting them is genuinely painful.
 4. **Invalid states are prevented, not validated.** A project session has no
    rating, so the form does not render the control.
 
+5. **Schemas are documented as JSDoc typedefs** at the top of `app.js`, and
+   validated at runtime only on JSON import.
+
 ## Engineering standard
 
 Work the way a senior engineer works with a capable junior on a shared
