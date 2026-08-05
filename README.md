@@ -9,7 +9,7 @@ and compare actual time spent against planned estimates.
 
 ## Why I built this
 
-I'm following a self-designed curriculum to move into AI engineering, building automations and applications on top of existing models. The plan spans seven modules with an estimated 358 hours of work.
+I'm following a self-designed curriculum to move into AI engineering, building automations and applications on top of existing models. 
 
 Tracking that in a spreadsheet gave me numbers but no answers. I wanted to know
 which modules consistently run over their estimate and *why* — so I could
@@ -21,7 +21,7 @@ This app is both the tool I use daily and the first project of that curriculum.
 
 - Log study sessions retrospectively (date, module, resource, duration, notes)
 - Record what blocked me in each session — the data that explains overruns
-- Weekly progress against a 15 h/week target
+- Weekly progress against a week target
 - Per-module comparison of actual hours vs. planned hours
 - Mark modules as complete
 - Export and import all data as JSON
