@@ -1,4 +1,3 @@
-
 # Specification — AI Journey
 
 **Version** 1.0 · **Date** August 2026 · **Status** approved, not yet implemented
@@ -11,9 +10,9 @@ Scope of this document: what version 1.0 must do. Stack and roadmap live in
 
 ## What it is
 
-A single-page web application for logging study hours against a self-designed
-AI learning plan, comparing actual time against planned estimates, and tracking
-time spent on personal projects.
+A single-page web application for logging hours against a self-designed AI
+learning curriculum and against personal projects, and comparing curriculum
+time against planned estimates.
 
 ## Who it is for
 
@@ -29,23 +28,30 @@ A single user: me. No accounts, no login, no permissions.
 
 ## Out of scope (version 1)
 
-No login. No cross-device sync. No timer. No charts. No notifications. No job
-application tracking. No public sharing view.
+No login. No cross-device sync. No timer. No charts. No notifications. No
+public sharing view.
+
+Job search is not tracked. This application measures learning, and nothing
+else.
 
 Editing the curriculum from the interface is deliberately excluded. Modules and
-resources are static reference data, changed by editing `modules.js` and
-committing. A curriculum that changes weekly is a signal, not a feature.
+resources are static data, changed by editing `modules.js` and committing. A
+curriculum that changes weekly is a signal, not a feature.
 
 ---
 
 ## Data model
 
-Three categories, and the distinction matters:
+Three categories, and the distinction drives the whole design:
 
 - **Static** — modules and resources, read from `modules.js`, never written.
 - **Persisted** — sessions and projects, stored in `localStorage`.
-- **Derived** — every hour total, progress bar, and average rating. Never
-  stored.
+- **Derived** — every hour total, progress figure, and average rating.
+  Never stored.
+
+JavaScript enforces no schema. The shapes below are documented as JSDoc
+typedefs at the top of `app.js` so the editor can catch typos, and validated at
+runtime only on JSON import, where data arrives from outside the application.
 
 ### Session — the atomic unit
 
@@ -56,7 +62,7 @@ Three categories, and the distinction matters:
   targetType: "resource" | "project"
   targetId:   string
   minutes:    number
-  rating:     number | null   // 1–5; null when targetType is "project"
+  rating:     number | null   // 1-5; always null when targetType is "project"
   notes:      string          // optional
   blocker:    string          // optional: what held me up
 }
@@ -66,8 +72,8 @@ Three categories, and the distinction matters:
 understanding. Not enjoyment, not difficulty. A frustrating session on a dense
 chapter can be a 5.
 
-Ratings apply to curriculum resources only. Projects are not rated: the form
-does not render the control, so the invalid state cannot be created.
+Projects are not rated. The form does not render the control for a project
+session, so the invalid state cannot be created.
 
 Sessions are logged retrospectively. The date is editable, because some entries
 are made the following day.
@@ -76,7 +82,7 @@ are made the following day.
 
 ```
 {
-  id:          string    // "01"
+  id:          string      // "00" through "07"
   name:        string
   month:       string
   deliverable: string
@@ -84,36 +90,55 @@ are made the following day.
 }
 ```
 
-Modules have no `plannedHours` field. Module planned hours are the sum of their
-resources; storing both would allow the two to disagree.
+Resources are nested rather than held in a flat list with a foreign key. A
+resource has no meaning outside its module and is never queried independently.
+
+Modules carry no `plannedHours`. Module hours are the sum of their resources;
+storing both would let the two disagree.
 
 ### Resource — static
 
 ```
 {
-  id:           string    // "01-r1"
+  id:           string      // "00-r1"
   name:         string
-  url:          string
-  description:  string    // what it covers
+  url:          string      // may be empty
+  description:  string
   plannedHours: number
 }
 ```
+
+`url` may be empty. Some resources are not yet purchased and have no stable
+link. An empty URL renders as plain text, not a dead link.
 
 ### Project — persisted
 
 ```
 {
-  id:          string    // uuid
+  id:          string      // uuid
   name:        string
   description: string
   url:         string
-  createdAt:   string    // ISO
+  createdAt:   string      // ISO
 }
 ```
 
-Three user-entered fields. Total hours are derived from sessions. Projects have
-no planned hours, so they show an accumulating total rather than progress
-against a target — a project is not "done at twenty hours".
+Three user-entered fields. Hours are derived. Projects have no planned hours
+and therefore no progress bar — a project is not "done at twenty hours".
+
+### Configuration
+
+Two values, defined once:
+
+```
+JOURNEY_START   "2026-08-05"
+JOURNEY_END     "2027-03-31"
+```
+
+The weekly target is derived, not configured: total planned curriculum hours
+divided by the number of weeks in the journey. Changing `modules.js` therefore
+changes the weekly target automatically, which is the correct behaviour — a
+heavier curriculum implies heavier weeks.
 
 ### Derived values
 
@@ -123,8 +148,11 @@ against a target — a project is not "done at twenty hours".
 | Resource rating | Mean of session ratings; absent when unrated |
 | Module actual hours | Sum of its resources' actual hours |
 | Module planned hours | Sum of its resources' planned hours |
-| Project total hours | Sum of session minutes where `targetId` matches |
+| Curriculum planned total | Sum of all module planned hours |
+| Project hours | Sum of session minutes where `targetId` matches |
 | Hours this week | Sum of session minutes since Monday |
+| Weekly target | Curriculum planned total ÷ weeks in journey |
+| Week counter | Weeks elapsed since `JOURNEY_START`, against total |
 | Streak | Consecutive days ending today with at least one session |
 
 An unrated resource and a badly rated resource must be visually distinct.
@@ -137,30 +165,42 @@ One page, four panels, top to bottom. All interface text in English.
 
 ### Panel 1 — Journey summary (fixed, always visible)
 
-Purpose statement and week counter (week *n* of *total*).
-Three figures: hours this week against the weekly target, total hours logged
-against total planned, and current streak.
-Link to an external calendar.
+Purpose statement and week counter.
+
+Three figures, deliberately separate:
+
+```
+Curriculum    18 / 367 h     with progress bar
+Projects            12 h     running total, no bar
+Total               30 h     the motivation number
+```
+
+Curriculum has a finite target and gets a bar. Projects have no end state and
+get a total. The combined figure belongs to neither and is the one worth
+looking at daily.
+
+Also: hours this week against the weekly target, current streak, and a link to
+an external calendar.
 
 ### Panel 2 — Projects
 
-One row per project: name, description, link, total hours logged, log control.
+One row per project: name, description, link, hours logged, log control.
 A control to add a project.
 
-Sits above the curriculum because it is the work being produced, not the
-material being consumed.
+Placed above the curriculum because it is the work being produced rather than
+the material being consumed.
 
 ### Panel 3 — Curriculum
 
-One collapsible block per module, showing name, month, and actual against
-planned hours in the header.
+One collapsible block per module: name, month, and actual against planned hours
+in the header.
 
-Expanded, each resource row shows: completion checkbox, name, link, what it
-covers, actual against planned hours, average usefulness rating, and a control
-to log a session against it.
+Expanded, each resource row shows completion checkbox, name, link, description,
+actual against planned hours, average usefulness rating, and a control to log a
+session.
 
-Resource completion is manual, not inferred from hours. Skipping a resource on
-purpose is legitimate.
+Resource completion is manual, never inferred from hours. Skipping a resource
+on purpose is legitimate.
 
 ### Panel 4 — Weekly schedule
 
@@ -171,7 +211,7 @@ Reference only. Collapsed by default.
 Initiated from a resource row or a project row, never from a global form. The
 target is therefore already known and never selected from a list.
 
-Fields: date (defaulting to today), minutes, rating where applicable, notes,
+Fields: date defaulting to today, minutes, rating where applicable, notes,
 blocker.
 
 ---
@@ -183,7 +223,7 @@ Complete when these work:
 1. Log a session against a resource, with rating
 2. Log a session against a project, without rating
 3. Add a project
-4. Journey summary showing weekly hours, total, week counter, and streak
+4. Journey summary with the three figures, week counter, and streak
 5. Curriculum panel with collapsible modules and resource-level rollups
 6. Mark a resource as complete
 7. Delete a session
@@ -192,8 +232,8 @@ Complete when these work:
 Item 8 is not optional. With `localStorage`, clearing browser data destroys
 months of records. The export is the insurance.
 
-Deleting a session requires the sessions to be reachable in the interface. How
-that list is presented is an implementation decision, not a specification one.
+Deleting a session requires sessions to be reachable in the interface. How that
+list is presented is an implementation decision, not a specification one.
 
 ---
 
@@ -204,8 +244,9 @@ that list is presented is an implementation decision, not a specification one.
 - **The curriculum is read-only at runtime.** No code path writes to module or
   resource data.
 - **Nothing derived is ever stored.** Totals are computed on read.
-- **The weekly target and journey start date are single configurable values**,
-  not repeated across the codebase.
+- **State changes trigger a full re-render**, never a targeted DOM update. One
+  logged session affects six figures on screen; recomputing everything from
+  state is slightly wasteful and impossible to get out of sync.
 
 ---
 
