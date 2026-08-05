@@ -1,4 +1,4 @@
-# AI_Journey — Study Tracker
+# ai-journey — Study Tracker
 
 A single-page web app to log study hours against a structured AI learning plan
 and compare actual time spent against planned estimates.
@@ -9,8 +9,7 @@ and compare actual time spent against planned estimates.
 
 ## Why I built this
 
-I'm following a self-designed curriculum to become a AI automation and application
-development (AI Engineer). The plan spans seven modules with an estimated 358 hours of work.
+I'm following a self-designed curriculum to move into AI engineering, building automations and applications on top of existing models. The plan spans seven modules with an estimated 358 hours of work.
 
 Tracking that in a spreadsheet gave me numbers but no answers. I wanted to know
 which modules consistently run over their estimate and *why* — so I could
@@ -43,9 +42,9 @@ No build step, no dependencies, no package manager.
 ├── index.html        # Markup and layout
 ├── style.css         # Styles
 ├── app.js            # Application logic
-├── modulos.js        # Curriculum reference data
+├── modules.js        # Curriculum reference data
 └── docs/
-    └── ESPECIFICACION.md
+    └── SPECIFICATION.md
 ```
 
 Curriculum data is kept separate from application logic so the plan can change
@@ -57,8 +56,8 @@ No installation required. Clone the repository and open `index.html` in a
 browser.
 
 ```bash
-git clone https://github.com/USERNAME/progreso-ia.git
-cd AI_journey
+git clone https://github.com/lucasVE-dev/ai-journey.git
+cd ai-journey
 open index.html
 ```
 
