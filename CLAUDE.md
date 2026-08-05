@@ -1,4 +1,3 @@
-
 # CLAUDE.md
 
 Working context for this repository. Read at the start of each session.
@@ -13,14 +12,26 @@ anything that changes behaviour. Do not restate its contents here.
 
 ## Who writes the code
 
-Electromechanical engineer. Solid background in C and C++ for electronics —
-loops, flags, state machines — but **no experience with web development or
-JavaScript**. The programming concepts are there; the language and the web
-patterns are not.
+Electromechanical engineer. Solid background in **C** for electronics — loops,
+flags, state machines, manual memory, pointers — plus some exposure to Python
+and a little C++. **No experience with web development or JavaScript.**
 
-In practice: no need to explain what a loop or a conditional is. Do explain the
-DOM, the event model, promises, `localStorage`, and any JavaScript idiom that
-has no equivalent in C++.
+The programming fundamentals are there and run deep: control flow, data
+structures, and what a machine actually does are not the gap.
+
+What is missing, and should be explained when it appears:
+
+- **Objects and their idioms.** C structs are the nearest reference point.
+  Methods, prototypes, destructuring and object literals are all new.
+- **Functions as values.** Function pointers exist in C, but passing functions
+  around is pervasive here, not occasional.
+- **Dynamic typing.** No declarations, no compiler, every error at runtime.
+- **The DOM and the event model.** There is no `main()`. Code sits idle and
+  fires on events.
+- **Asynchrony.** Promises, `async`/`await`, the event loop.
+- **Automatic memory management.** No allocation, no freeing, no pointers.
+
+Do not explain loops, conditionals, or what a function is.
 
 ## Stack
 
@@ -55,9 +66,6 @@ Four source files. Not one more until splitting them is genuinely painful.
 
 4. **Invalid states are prevented, not validated.** A project session has no
    rating, so the form does not render the control.
-
-5. **Schemas are documented as JSDoc typedefs** at the top of `app.js`, and
-   validated at runtime only on JSON import.
 
 ## Engineering standard
 
