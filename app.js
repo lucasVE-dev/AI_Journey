@@ -330,13 +330,132 @@ function renderResource(resource) {
       <div class="resource-figures">
         <span class="resource-hours">${formatHours(actual)} / ${resource.plannedHours} h</span>
         <span class="resource-rating ${isUnrated ? "unrated" : ""}">${formatRating(rating)}</span>
+        <button type="button" class="log-button" data-target-type="resource" data-target-id="${resource.id}">
+          + Log time
+        </button>
       </div>
     </div>
   `;
 }
 
 
+/* ========== Session logging ========== */
+
+/** The resource or project a new session will be attached to. */
+let pendingTarget = null;
+
+function newId() {
+  // crypto.randomUUID needs a secure context. Falls back for local file:// use.
+  if (window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return String(Date.now()) + "-" + String(Math.random()).slice(2, 8);
+}
+
+function openSessionDialog(targetType, targetId, label) {
+  pendingTarget = { targetType, targetId };
+
+  const dialog = document.getElementById("session-dialog");
+  const title = document.getElementById("session-dialog-title");
+  const ratingField = document.getElementById("session-rating-field");
+  const dateInput = document.getElementById("session-date");
+
+  title.textContent = label;
+  dateInput.value = isoDate(new Date());
+
+  // Projects are never rated, so the control is removed rather than ignored.
+  const isProject = targetType === "project";
+  ratingField.hidden = isProject;
+
+  dialog.showModal();
+}
+
+function closeSessionDialog() {
+  const dialog = document.getElementById("session-dialog");
+  const form = document.getElementById("session-form");
+
+  form.reset();
+  pendingTarget = null;
+  dialog.close();
+}
+
+function readRating() {
+  const isProject = pendingTarget.targetType === "project";
+  if (isProject) {
+    return null;
+  }
+
+  const value = document.getElementById("session-rating").value;
+  if (value === "") {
+    return null;
+  }
+  return Number(value);
+}
+
+function saveSessionFromForm() {
+  const minutes = Number(document.getElementById("session-minutes").value);
+
+  const session = {
+    id: newId(),
+    date: document.getElementById("session-date").value,
+    targetType: pendingTarget.targetType,
+    targetId: pendingTarget.targetId,
+    minutes: minutes,
+    rating: readRating(),
+    notes: document.getElementById("session-notes").value,
+    blocker: document.getElementById("session-blocker").value
+  };
+
+  state.sessions.push(session);
+  saveState();
+  render();
+}
+
+
+/* ========== Events ========== */
+
+/**
+ * Listeners are attached to containers, not to buttons.
+ *
+ * render() replaces innerHTML, which destroys every element inside it along
+ * with any listener attached to them. A listener on the container survives,
+ * because the container itself is never replaced. The event bubbles up from
+ * whichever button was clicked and we identify it from the event target.
+ */
+function wireEvents() {
+  const modulesList = document.getElementById("modules-list");
+
+  modulesList.addEventListener("click", function (event) {
+    const button = event.target.closest(".log-button");
+    if (!button) {
+      return;
+    }
+
+    const targetType = button.dataset.targetType;
+    const targetId = button.dataset.targetId;
+    const row = button.closest(".resource");
+    const label = row.querySelector(".resource-name").textContent.trim();
+
+    openSessionDialog(targetType, targetId, label);
+  });
+
+  const form = document.getElementById("session-form");
+
+  form.addEventListener("submit", function () {
+    saveSessionFromForm();
+    closeSessionDialog();
+  });
+
+  const cancelButton = document.getElementById("session-cancel");
+
+  cancelButton.addEventListener("click", function () {
+    closeSessionDialog();
+  });
+}
+
+
 /* ========== Start ========== */
 
 loadState();
+wireEvents();
 render();
