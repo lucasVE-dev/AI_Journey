@@ -217,6 +217,28 @@ function isoDate(date) {
 
 /* ========== Formatting ========== */
 
+/**
+ * Makes a string safe to place inside HTML.
+ *
+ * Curriculum text comes from modules.js, which we wrote. Project text comes
+ * from a form, and a name containing <script> would otherwise be executed
+ * rather than displayed. Letting the browser do the conversion is safer than
+ * writing the replacements by hand.
+ */
+function escapeHtml(value) {
+  const element = document.createElement("div");
+  element.textContent = value;
+  return element.innerHTML;
+}
+
+/** Only http and https links are rendered. Blocks javascript: URLs. */
+function isSafeUrl(value) {
+  if (!value) {
+    return false;
+  }
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
 function formatHours(hours) {
   const isWholeNumber = hours % 1 === 0;
 
@@ -247,6 +269,7 @@ function formatRating(average) {
  */
 function render() {
   renderSummary();
+  renderProjects();
   renderCurriculum();
 }
 
@@ -282,6 +305,46 @@ function renderSummary() {
       This week ${formatHours(hoursThisWeek())} / ${WEEKLY_TARGET_HOURS} h
       · Streak ${currentStreak()} days
     </p>
+  `;
+}
+
+function renderProjects() {
+  const container = document.getElementById("projects-list");
+  const hasProjects = state.projects.length > 0;
+
+  if (!hasProjects) {
+    container.innerHTML = `<p class="empty">No projects yet.</p>`;
+    return;
+  }
+
+  const rows = state.projects.map(project => renderProject(project));
+  container.innerHTML = rows.join("");
+}
+
+function renderProject(project) {
+  const hours = hoursLoggedFor(project.id);
+  const name = escapeHtml(project.name);
+  const description = escapeHtml(project.description);
+
+  let link = name;
+  if (isSafeUrl(project.url)) {
+    const url = escapeHtml(project.url);
+    link = `<a href="${url}" target="_blank" rel="noopener">${name}</a>`;
+  }
+
+  return `
+    <div class="project" data-project-id="${project.id}">
+      <div class="project-main">
+        <span class="project-name">${link}</span>
+        <p class="project-description">${description}</p>
+      </div>
+      <div class="project-figures">
+        <span class="project-hours">${formatHours(hours)} h</span>
+        <button type="button" class="log-button" data-target-type="project" data-target-id="${project.id}">
+          + Log time
+        </button>
+      </div>
+    </div>
   `;
 }
 
@@ -412,6 +475,36 @@ function saveSessionFromForm() {
 }
 
 
+/* ========== Projects ========== */
+
+function openProjectDialog() {
+  const dialog = document.getElementById("project-dialog");
+  dialog.showModal();
+}
+
+function closeProjectDialog() {
+  const dialog = document.getElementById("project-dialog");
+  const form = document.getElementById("project-form");
+
+  form.reset();
+  dialog.close();
+}
+
+function saveProjectFromForm() {
+  const project = {
+    id: newId(),
+    name: document.getElementById("project-name").value,
+    description: document.getElementById("project-description").value,
+    url: document.getElementById("project-url").value,
+    createdAt: isoDate(new Date())
+  };
+
+  state.projects.push(project);
+  saveState();
+  render();
+}
+
+
 /* ========== Events ========== */
 
 /**
@@ -422,21 +515,50 @@ function saveSessionFromForm() {
  * because the container itself is never replaced. The event bubbles up from
  * whichever button was clicked and we identify it from the event target.
  */
+function handleLogButtonClick(event, rowSelector, nameSelector) {
+  const button = event.target.closest(".log-button");
+  if (!button) {
+    return;
+  }
+
+  const targetType = button.dataset.targetType;
+  const targetId = button.dataset.targetId;
+  const row = button.closest(rowSelector);
+  const label = row.querySelector(nameSelector).textContent.trim();
+
+  openSessionDialog(targetType, targetId, label);
+}
+
 function wireEvents() {
   const modulesList = document.getElementById("modules-list");
 
   modulesList.addEventListener("click", function (event) {
-    const button = event.target.closest(".log-button");
-    if (!button) {
-      return;
-    }
+    handleLogButtonClick(event, ".resource", ".resource-name");
+  });
 
-    const targetType = button.dataset.targetType;
-    const targetId = button.dataset.targetId;
-    const row = button.closest(".resource");
-    const label = row.querySelector(".resource-name").textContent.trim();
+  const projectsList = document.getElementById("projects-list");
 
-    openSessionDialog(targetType, targetId, label);
+  projectsList.addEventListener("click", function (event) {
+    handleLogButtonClick(event, ".project", ".project-name");
+  });
+
+  const addProjectButton = document.getElementById("add-project-button");
+
+  addProjectButton.addEventListener("click", function () {
+    openProjectDialog();
+  });
+
+  const projectForm = document.getElementById("project-form");
+
+  projectForm.addEventListener("submit", function () {
+    saveProjectFromForm();
+    closeProjectDialog();
+  });
+
+  const projectCancel = document.getElementById("project-cancel");
+
+  projectCancel.addEventListener("click", function () {
+    closeProjectDialog();
   });
 
   const form = document.getElementById("session-form");
