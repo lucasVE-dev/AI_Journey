@@ -435,30 +435,6 @@ function openSessionDialog(targetType, targetId, label) {
 
 function closeSessionDialog() {
   const dialog = document.getElementById("session-dialog");
-  const exportButton = document.getElementById("export-button");
-
-  exportButton.addEventListener("click", function () {
-    exportData();
-  });
-
-  const importButton = document.getElementById("import-button");
-  const importFile = document.getElementById("import-file");
-
-  // The file input is hidden because browsers style it badly and cannot be
-  // restyled. The visible button forwards the click to it.
-  importButton.addEventListener("click", function () {
-    importFile.click();
-  });
-
-  importFile.addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      importData(file);
-    }
-    // Cleared so selecting the same file twice still fires a change event.
-    event.target.value = "";
-  });
-
   const form = document.getElementById("session-form");
 
   form.reset();
@@ -714,6 +690,30 @@ function wireEvents() {
 
   projectCancel.addEventListener("click", function () {
     closeProjectDialog();
+  });
+
+  const exportButton = document.getElementById("export-button");
+
+  exportButton.addEventListener("click", function () {
+    exportData();
+  });
+
+  const importButton = document.getElementById("import-button");
+  const importFile = document.getElementById("import-file");
+
+  // The file input is hidden because browsers style it badly and cannot be
+  // restyled. The visible button forwards the click to it.
+  importButton.addEventListener("click", function () {
+    importFile.click();
+  });
+
+  importFile.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      importData(file);
+    }
+    // Cleared so selecting the same file twice still fires a change event.
+    event.target.value = "";
   });
 
   const form = document.getElementById("session-form");
