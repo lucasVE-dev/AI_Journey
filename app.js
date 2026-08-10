@@ -543,9 +543,17 @@ function exportData() {
   const link = document.createElement("a");
   link.href = url;
   link.download = "ai-journey-" + isoDate(new Date()) + ".json";
-  link.click();
 
-  URL.revokeObjectURL(url);
+  // The link must be in the document for click() to work in some browsers,
+  // and the URL must stay alive until the download has actually started —
+  // click() schedules it rather than performing it immediately.
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  window.setTimeout(function () {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 /**
