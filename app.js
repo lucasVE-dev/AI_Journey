@@ -282,29 +282,53 @@ function renderSummary() {
   const percent = fraction * 100;
   const container = document.getElementById("summary-figures");
 
+  const week = hoursThisWeek();
+  const weekPercent = Math.min((week / WEEKLY_TARGET_HOURS) * 100, 100);
+  const weekOver = week > WEEKLY_TARGET_HOURS;
+  const curriculumPercent = Math.min(percent, 100);
+  const curriculumOver = curriculumActual > curriculumPlanned;
+
   container.innerHTML = `
-    <p class="week-counter">Week ${currentWeek()}</p>
-
-    <div class="figure">
-      <span class="figure-label">Curriculum</span>
-      <span class="figure-value">${formatHours(curriculumActual)} / ${formatHours(curriculumPlanned)} h</span>
-      <div class="bar"><div class="bar-fill" style="width: ${percent}%"></div></div>
+    <div class="readouts">
+      <div class="readout readout--hero">
+        <span class="readout-value">${formatHours(total)}</span>
+        <span class="readout-label">Hours logged</span>
+      </div>
+      <div class="readout">
+        <span class="readout-value">${currentWeek()}</span>
+        <span class="readout-label">Week</span>
+      </div>
+      <div class="readout">
+        <span class="readout-value">${currentStreak()}</span>
+        <span class="readout-label">Day streak</span>
+      </div>
     </div>
 
-    <div class="figure">
-      <span class="figure-label">Projects</span>
-      <span class="figure-value">${formatHours(projects)} h</span>
+    <div class="scales">
+      ${renderScale("This week", week, WEEKLY_TARGET_HOURS, weekPercent, weekOver)}
+      ${renderScale("Curriculum", curriculumActual, curriculumPlanned, curriculumPercent, curriculumOver)}
+      <div class="scale scale--untargeted">
+        <span class="scale-label">Projects</span>
+        <span class="scale-figures">${formatHours(projects)} h</span>
+      </div>
     </div>
+  `;
+}
 
-    <div class="figure">
-      <span class="figure-label">Total</span>
-      <span class="figure-value">${formatHours(total)} h</span>
+/**
+ * A measurement against a nominal value. The tick marks the target; the fill
+ * turns amber past it. Overrunning an estimate is information, not failure.
+ */
+function renderScale(label, actual, nominal, fillPercent, isOver) {
+  return `
+    <div class="scale ${isOver ? "is-over" : ""}">
+      <span class="scale-label">${label}</span>
+      <span class="scale-figures">${formatHours(actual)} <em>/ ${formatHours(nominal)} h</em></span>
+      <div class="scale-track">
+        <div class="scale-fill" style="width: ${fillPercent}%"></div>
+        <div class="scale-tick"></div>
+      </div>
     </div>
-
-    <p class="week-figures">
-      This week ${formatHours(hoursThisWeek())} / ${WEEKLY_TARGET_HOURS} h
-      · Streak ${currentStreak()} days
-    </p>
   `;
 }
 
@@ -359,13 +383,20 @@ function renderModule(module) {
   const planned = modulePlannedHours(module);
   const rows = module.resources.map(resource => renderResource(resource));
   const resourceRows = rows.join("");
+  const isOver = actual > planned;
+  const fillPercent = Math.min((actual / planned) * 100, 100);
 
   return `
     <details class="module">
       <summary>
-        <span class="module-name">${module.id} · ${module.name}</span>
+        <span class="module-id">${module.id}</span>
+        <span class="module-name">${module.name}</span>
         <span class="module-month">${module.month}</span>
-        <span class="module-hours">${formatHours(actual)} / ${planned} h</span>
+        <span class="module-hours">${formatHours(actual)} <em>/ ${planned} h</em></span>
+        <div class="scale-track ${isOver ? "is-over" : ""}">
+          <div class="scale-fill" style="width: ${fillPercent}%"></div>
+          <div class="scale-tick"></div>
+        </div>
       </summary>
       <div class="resources">
         ${resourceRows}
