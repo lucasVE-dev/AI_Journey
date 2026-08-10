@@ -435,6 +435,30 @@ function openSessionDialog(targetType, targetId, label) {
 
 function closeSessionDialog() {
   const dialog = document.getElementById("session-dialog");
+  const exportButton = document.getElementById("export-button");
+
+  exportButton.addEventListener("click", function () {
+    exportData();
+  });
+
+  const importButton = document.getElementById("import-button");
+  const importFile = document.getElementById("import-file");
+
+  // The file input is hidden because browsers style it badly and cannot be
+  // restyled. The visible button forwards the click to it.
+  importButton.addEventListener("click", function () {
+    importFile.click();
+  });
+
+  importFile.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      importData(file);
+    }
+    // Cleared so selecting the same file twice still fires a change event.
+    event.target.value = "";
+  });
+
   const form = document.getElementById("session-form");
 
   form.reset();
@@ -500,6 +524,129 @@ function saveProjectFromForm() {
   };
 
   state.projects.push(project);
+  saveState();
+  render();
+}
+
+
+/* ========== Export and import ========== */
+
+function exportData() {
+  const json = JSON.stringify(state, null, 2);
+
+  // A Blob is a file-like object held in memory. createObjectURL gives it a
+  // temporary URL so a link can point at it, which is how a browser downloads
+  // something that was never on a server.
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "ai-journey-" + isoDate(new Date()) + ".json";
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Checks imported data before it is trusted.
+ *
+ * This is the only place data enters the application from outside, so it is
+ * the only place that validates. Everything past this point assumes the shape
+ * is correct, and that assumption is only safe because of this function.
+ *
+ * Returns an array of problems. Empty means the data is usable.
+ */
+function findImportProblems(data) {
+  const problems = [];
+
+  if (data === null || typeof data !== "object") {
+    problems.push("File does not contain an object.");
+    return problems;
+  }
+
+  if (!Array.isArray(data.sessions)) {
+    problems.push("Missing a sessions array.");
+  }
+
+  if (!Array.isArray(data.projects)) {
+    problems.push("Missing a projects array.");
+  }
+
+  if (problems.length > 0) {
+    return problems;
+  }
+
+  data.sessions.forEach(function (session, index) {
+    const position = "Session " + (index + 1);
+
+    if (typeof session.id !== "string") {
+      problems.push(position + " has no id.");
+    }
+    if (typeof session.date !== "string") {
+      problems.push(position + " has no date.");
+    }
+    if (typeof session.minutes !== "number" || Number.isNaN(session.minutes)) {
+      problems.push(position + " has invalid minutes.");
+    }
+    if (session.targetType !== "resource" && session.targetType !== "project") {
+      problems.push(position + " has an unknown target type.");
+    }
+    if (typeof session.targetId !== "string") {
+      problems.push(position + " has no target.");
+    }
+  });
+
+  data.projects.forEach(function (project, index) {
+    const position = "Project " + (index + 1);
+
+    if (typeof project.id !== "string") {
+      problems.push(position + " has no id.");
+    }
+    if (typeof project.name !== "string") {
+      problems.push(position + " has no name.");
+    }
+  });
+
+  return problems;
+}
+
+/**
+ * Reading a file takes time, so file.text() hands back a promise rather than
+ * the contents. "await" pauses this function until it resolves. The function
+ * is marked "async" because only an async function may await.
+ */
+async function importData(file) {
+  let data;
+
+  try {
+    const text = await file.text();
+    data = JSON.parse(text);
+  } catch (error) {
+    window.alert("That file is not valid JSON.");
+    return;
+  }
+
+  const problems = findImportProblems(data);
+
+  if (problems.length > 0) {
+    window.alert("Import cancelled:\n\n" + problems.slice(0, 10).join("\n"));
+    return;
+  }
+
+  const sessionCount = data.sessions.length;
+  const projectCount = data.projects.length;
+  const confirmed = window.confirm(
+    "Replace all current data with " + sessionCount + " sessions and " +
+    projectCount + " projects? This cannot be undone."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  state.sessions = data.sessions;
+  state.projects = data.projects;
   saveState();
   render();
 }
