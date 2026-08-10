@@ -1,55 +1,507 @@
-/* Baseline only. The design pass comes once app.js generates real markup. */
+/* ==========================================================================
+   AI Journey
+   Instrument panel: readings measured against nominal values.
+   ========================================================================== */
 
-* {
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --ground:    #E6E9ED;   /* anodised grey, cool */
+  --panel:     #FFFFFF;
+  --ink:       #141B24;
+  --ink-2:     #59636F;
+  --ink-3:     #949CA6;
+  --rule:      #D3D8DE;
+  --rule-soft: #E8EBEF;
+  --signal:    #2540C8;   /* measured value */
+  --over:      #B96C10;   /* past nominal */
+
+  --sans: 'Archivo', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
 }
+
+* { box-sizing: border-box; }
 
 body {
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
-  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem;
-  color: #1a1a1a;
-  background: #ffffff;
+  padding: 2rem 1.25rem 5rem;
+  max-width: 860px;
+  font-family: var(--sans);
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--ground);
 }
 
+/* ===== Summary panel ===================================================== */
+
+#summary-panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1.75rem 1.75rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+#summary-panel h1 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#purpose {
+  margin: 0.1rem 0 1.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.readouts {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.readout { display: flex; flex-direction: column; }
+
+.readout-value {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout--hero .readout-value {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.readout-label {
+  margin-top: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ===== The scale — signature element ===================================== */
+
+.scales { padding-top: 1.5rem; }
+
+.scale {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.3rem 1rem;
+  margin-bottom: 1.125rem;
+}
+
+.scale:last-child { margin-bottom: 0; }
+
+.scale-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.scale-figures {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.scale-figures em {
+  font-style: normal;
+  color: var(--ink-3);
+}
+
+.scale-track {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 6px;
+  background: var(--rule-soft);
+  border-left: 1px solid var(--ink);
+}
+
+.scale-fill {
+  height: 100%;
+  background: var(--signal);
+  transition: width 0.4s ease;
+}
+
+/* The nominal marker: the point the reading is measured against. */
+.scale-tick {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  width: 1px;
+  height: 12px;
+  background: var(--ink);
+}
+
+.scale.is-over .scale-fill,
+.scale-track.is-over .scale-fill { background: var(--over); }
+
+.scale--untargeted .scale-figures { color: var(--ink-2); }
+
+/* ===== Panels ============================================================ */
+
 section {
-  margin-bottom: 2.5rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  margin-bottom: 1.25rem;
 }
 
 .panel-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
 }
 
+.panel-header h2,
+#schedule-panel summary h2 {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* ===== Projects ========================================================== */
+
+.project {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.project:last-child { border-bottom: none; }
+
+.project-name { font-size: 0.9375rem; font-weight: 500; }
+
+.project-description {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  max-width: 46ch;
+}
+
+.project-figures {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+.project-hours {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  margin: 0;
+  padding: 1.5rem 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+/* ===== Curriculum ======================================================== */
+
+.module { border-bottom: 1px solid var(--rule-soft); }
+.module:last-child { border-bottom: none; }
+
+.module > summary {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: baseline;
+  gap: 0.25rem 0.875rem;
+  padding: 0.9375rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.module > summary::-webkit-details-marker { display: none; }
+.module > summary:hover { background: #FAFBFC; }
+
+.module-id {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.module[open] .module-id { color: var(--signal); }
+
+.module-name { font-size: 0.9375rem; font-weight: 500; }
+
+.module-month {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.module-hours {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.module-hours em { font-style: normal; color: var(--ink-3); }
+
+.module > summary .scale-track {
+  grid-column: 2 / -1;
+  grid-row: 3;
+  margin-top: 0.5rem;
+}
+
+/* ===== Resources ========================================================= */
+
+.resources {
+  background: #FAFBFC;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.resource {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.875rem 1.25rem 0.875rem 3.125rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.resource:last-child { border-bottom: none; }
+
+.resource-name { font-size: 0.875rem; }
+
+.resource-name a {
+  color: var(--ink);
+  text-decoration-color: var(--ink-3);
+  text-underline-offset: 3px;
+}
+
+.resource-name a:hover { color: var(--signal); }
+
+.resource-description {
+  margin: 0.1875rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+
+.resource-figures {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  white-space: nowrap;
+}
+
+.resource-hours {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.resource-rating {
+  font-size: 0.75rem;
+  color: var(--signal);
+  letter-spacing: 0.05em;
+}
+
+.resource-rating.unrated { color: var(--ink-3); }
+
+/* ===== Buttons =========================================================== */
+
+button {
+  font-family: var(--sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4375rem 0.75rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+button:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.log-button { border-color: var(--rule-soft); }
+
+#session-save,
+#project-save {
+  color: var(--panel);
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+#session-save:hover,
+#project-save:hover { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* ===== Schedule ========================================================== */
+
+#schedule-panel > details > summary {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+#schedule-panel > details > summary::-webkit-details-marker { display: none; }
+#schedule-panel > details[open] > summary { border-bottom: 1px solid var(--rule); }
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1.25rem;
+}
+
+.schedule-grid h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.schedule-grid dt {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--signal);
+  margin-top: 0.75rem;
+}
+
+.schedule-grid dd {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+/* ===== Data footer ======================================================= */
+
+#data-panel {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+/* ===== Dialogs =========================================================== */
+
 dialog {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 1.5rem;
-  max-width: 400px;
-  width: 90%;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  padding: 1.75rem;
+  max-width: 380px;
+  width: 92%;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+dialog::backdrop { background: rgba(20, 27, 36, 0.45); }
+
+dialog h2 {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
 }
 
 dialog label {
   display: block;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
+  margin-top: 0.875rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 dialog input,
 dialog select,
 dialog textarea {
   width: 100%;
-  font: inherit;
-  padding: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  padding: 0.5rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+}
+
+dialog textarea { font-family: var(--sans); resize: vertical; }
+
+dialog input:focus,
+dialog select:focus,
+dialog textarea:focus {
+  outline: none;
+  border-color: var(--signal);
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
+}
+
+/* ===== Responsive ======================================================== */
+
+@media (max-width: 640px) {
+  body { padding: 1rem 0.75rem 3rem; }
+
+  #summary-panel { padding: 1.25rem; }
+
+  .readouts { gap: 1.5rem; }
+  .readout--hero .readout-value { font-size: 2.5rem; }
+
+  .project,
+  .resource {
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .resource { padding-left: 1.25rem; }
+
+  .module > summary { grid-template-columns: 1.75rem 1fr; }
+  .module-hours { grid-column: 1 / -1; grid-row: 3; text-align: left; }
+  .module > summary .scale-track { grid-row: 4; }
+
+  .schedule-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
