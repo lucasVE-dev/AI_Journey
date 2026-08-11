@@ -40,14 +40,35 @@ const STORAGE_KEY = "ai-journey";
 
 /* ========== State ========== */
 
-/** @type {{sessions: Session[], projects: Project[]}} */
+/**
+ * completedResources holds resource ids. Completion is user state, so it
+ * cannot live in modules.js, which is read-only at runtime.
+ *
+ * @type {{sessions: Session[], projects: Project[], completedResources: string[]}}
+ */
 let state = {
   sessions: [],
-  projects: []
+  projects: [],
+  completedResources: []
 };
 
 
-/* ========== Main ====== */
+/**
+ * Which month the calendar shows. This is view state, not user data — it is
+ * never saved, and resets to the current month on reload.
+ */
+let calendarMonth = new Date();
+
+
+/* ========== Entry point ==================================================
+
+   Everything below this block is a function declaration. JavaScript hoists
+   those, so they can be called here before they appear in the file — no
+   forward declarations needed.
+
+   Note this only holds for `function name() {}`. A function assigned to a
+   const is not hoisted and would throw if called from here.
+   ======================================================================== */
 
 loadState();
 wireEvents();
@@ -64,6 +85,7 @@ function loadState() {
     const parsed = JSON.parse(stored);
     state.sessions = parsed.sessions || [];
     state.projects = parsed.projects || [];
+    state.completedResources = parsed.completedResources || [];
   } catch (error) {
     console.error("Stored data could not be read:", error);
     // Leave state at its defaults rather than crashing. The stored value is
@@ -148,6 +170,33 @@ function averageRatingFor(targetId) {
   const ratings = rated.map(session => session.rating);
   const total = sum(ratings);
   return total / rated.length;
+}
+
+
+/* ========== Completion ========== */
+
+function isResourceComplete(resourceId) {
+  return state.completedResources.includes(resourceId);
+}
+
+function toggleResourceComplete(resourceId) {
+  const complete = isResourceComplete(resourceId);
+
+  if (complete) {
+    state.completedResources = state.completedResources.filter(
+      id => id !== resourceId
+    );
+  } else {
+    state.completedResources.push(resourceId);
+  }
+
+  saveState();
+  render();
+}
+
+function completedCountFor(module) {
+  const done = module.resources.filter(resource => isResourceComplete(resource.id));
+  return done.length;
 }
 
 
@@ -276,6 +325,7 @@ function formatRating(average) {
  */
 function render() {
   renderSummary();
+  renderCalendar();
   renderProjects();
   renderCurriculum();
 }
@@ -339,6 +389,92 @@ function renderScale(label, actual, nominal, fillPercent, isOver) {
   `;
 }
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
+
+/** Total minutes logged per day, keyed by ISO date. */
+function minutesByDay() {
+  const totals = {};
+
+  state.sessions.forEach(function (session) {
+    const existing = totals[session.date] || 0;
+    totals[session.date] = existing + session.minutes;
+  });
+
+  return totals;
+}
+
+/** Four intensity steps, so a glance reads density without exact figures. */
+function intensityLevel(minutes) {
+  if (minutes === 0) {
+    return 0;
+  }
+  if (minutes < 60) {
+    return 1;
+  }
+  if (minutes < 120) {
+    return 2;
+  }
+  if (minutes < 240) {
+    return 3;
+  }
+  return 4;
+}
+
+function renderCalendar() {
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  const totals = minutesByDay();
+
+  const label = document.getElementById("calendar-month");
+  label.textContent = MONTH_NAMES[month] + " " + year;
+
+  const firstOfMonth = new Date(year, month, 1);
+  const weekday = firstOfMonth.getDay();
+  const blanksBefore = weekday === 0 ? 6 : weekday - 1;
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const headers = WEEKDAY_INITIALS.map(function (initial) {
+    return `<div class="cal-head">${initial}</div>`;
+  });
+
+  const blanks = [];
+  for (let i = 0; i < blanksBefore; i += 1) {
+    blanks.push(`<div class="cal-day is-blank"></div>`);
+  }
+
+  const days = [];
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = isoDate(new Date(year, month, day));
+    const minutes = totals[date] || 0;
+    const level = intensityLevel(minutes);
+    const hours = minutes / 60;
+    const figure = minutes > 0 ? formatHours(hours) : "";
+
+    days.push(`
+      <div class="cal-day level-${level}" title="${date}">
+        <span class="cal-date">${day}</span>
+        <span class="cal-hours">${figure}</span>
+      </div>
+    `);
+  }
+
+  const grid = document.getElementById("calendar-grid");
+  grid.innerHTML = headers.join("") + blanks.join("") + days.join("");
+}
+
+function shiftCalendarMonth(offset) {
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  calendarMonth = new Date(year, month + offset, 1);
+  renderCalendar();
+}
+
 function renderProjects() {
   const container = document.getElementById("projects-list");
   const hasProjects = state.projects.length > 0;
@@ -398,7 +534,7 @@ function renderModule(module) {
       <summary>
         <span class="module-id">${module.id}</span>
         <span class="module-name">${module.name}</span>
-        <span class="module-month">${module.month}</span>
+        <span class="module-month">${module.month} · ${completedCountFor(module)}/${module.resources.length} done</span>
         <span class="module-hours">${formatHours(actual)} <em>/ ${planned} h</em></span>
         <div class="scale-track ${isOver ? "is-over" : ""}">
           <div class="scale-fill" style="width: ${fillPercent}%"></div>
@@ -422,9 +558,15 @@ function renderResource(resource) {
     link = `<a href="${resource.url}" target="_blank" rel="noopener">${resource.name}</a>`;
   }
 
+  const complete = isResourceComplete(resource.id);
+
   return `
-    <div class="resource" data-resource-id="${resource.id}">
+    <div class="resource ${complete ? "is-complete" : ""}" data-resource-id="${resource.id}">
       <div class="resource-main">
+        <button type="button" class="tickbox" data-resource-id="${resource.id}"
+                aria-pressed="${complete}" aria-label="Mark complete">
+          ${complete ? "✓" : ""}
+        </button>
         <span class="resource-name">${link}</span>
         <p class="resource-description">${resource.description}</p>
       </div>
@@ -595,6 +737,13 @@ function findImportProblems(data) {
     problems.push("Missing a projects array.");
   }
 
+  const hasCompleted = data.completedResources === undefined
+    || Array.isArray(data.completedResources);
+
+  if (!hasCompleted) {
+    problems.push("completedResources is not a list.");
+  }
+
   if (problems.length > 0) {
     return problems;
   }
@@ -669,6 +818,7 @@ async function importData(file) {
 
   state.sessions = data.sessions;
   state.projects = data.projects;
+  state.completedResources = data.completedResources || [];
   saveState();
   render();
 }
@@ -702,6 +852,13 @@ function wireEvents() {
   const modulesList = document.getElementById("modules-list");
 
   modulesList.addEventListener("click", function (event) {
+    const tickbox = event.target.closest(".tickbox");
+
+    if (tickbox) {
+      toggleResourceComplete(tickbox.dataset.resourceId);
+      return;
+    }
+
     handleLogButtonClick(event, ".resource", ".resource-name");
   });
 
@@ -709,6 +866,18 @@ function wireEvents() {
 
   projectsList.addEventListener("click", function (event) {
     handleLogButtonClick(event, ".project", ".project-name");
+  });
+
+  const calendarPrev = document.getElementById("calendar-prev");
+
+  calendarPrev.addEventListener("click", function () {
+    shiftCalendarMonth(-1);
+  });
+
+  const calendarNext = document.getElementById("calendar-next");
+
+  calendarNext.addEventListener("click", function () {
+    shiftCalendarMonth(1);
   });
 
   const addProjectButton = document.getElementById("add-project-button");
