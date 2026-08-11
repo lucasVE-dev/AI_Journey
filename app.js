@@ -72,19 +72,7 @@ let calendarMonth = new Date();
 let pendingTarget = null;
 
 
-/* ========== Entry point ==================================================
-
-   Everything below this block is a function declaration. JavaScript hoists
-   those, so they can be called here before they appear in the file — no
-   forward declarations needed.
-
-   Note this only holds for `function name() {}`. A function assigned to a
-   const is not hoisted and would throw if called from here.
-
-   The same applies to values: every const and let used by these three calls,
-   however indirectly, must be declared above this block. `const` is not
-   hoisted usefully — the name exists but throws until its line runs.
-   ======================================================================== */
+/* ========== Main ========= */
 
 loadState();
 wireEvents();
@@ -218,7 +206,21 @@ function completedCountFor(module) {
 
 /* ========== Derived: time ========== */
 
+/**
+ * Turns a value into a local date with the time stripped.
+ *
+ * A "YYYY-MM-DD" string is parsed by hand: new Date("2026-08-11") treats it as
+ * UTC midnight, which lands on the previous local day anywhere west of UTC.
+ */
 function toDateOnly(value) {
+  if (typeof value === "string") {
+    const parts = value.split("-");
+    const year = Number(parts[0]);
+    const month = Number(parts[1]) - 1;
+    const day = Number(parts[2]);
+    return new Date(year, month, day);
+  }
+
   const date = new Date(value);
   date.setHours(0, 0, 0, 0);
   return date;
@@ -280,8 +282,19 @@ function currentStreak() {
   return streak;
 }
 
+/**
+ * Formats a date as YYYY-MM-DD using local calendar parts.
+ *
+ * toISOString() would convert to UTC first, which shifts the date by one day
+ * for anyone not on UTC — local midnight in Spain is 22:00 the previous day
+ * in UTC. Every date in this app is a calendar date, never an instant, so
+ * local parts are the correct source.
+ */
 function isoDate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
 }
 
 
