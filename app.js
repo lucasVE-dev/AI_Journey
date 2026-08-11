@@ -37,6 +37,15 @@ const JOURNEY_START = "2026-08-05";
 const WEEKLY_TARGET_HOURS = 15;
 const STORAGE_KEY = "ai-journey";
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
+
 
 /* ========== State ========== */
 
@@ -59,6 +68,9 @@ let state = {
  */
 let calendarMonth = new Date();
 
+/** The resource or project a new session will be attached to. */
+let pendingTarget = null;
+
 
 /* ========== Entry point ==================================================
 
@@ -68,6 +80,10 @@ let calendarMonth = new Date();
 
    Note this only holds for `function name() {}`. A function assigned to a
    const is not hoisted and would throw if called from here.
+
+   The same applies to values: every const and let used by these three calls,
+   however indirectly, must be declared above this block. `const` is not
+   hoisted usefully — the name exists but throws until its line runs.
    ======================================================================== */
 
 loadState();
@@ -201,8 +217,6 @@ function completedCountFor(module) {
 
 
 /* ========== Derived: time ========== */
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function toDateOnly(value) {
   const date = new Date(value);
@@ -388,13 +402,6 @@ function renderScale(label, actual, nominal, fillPercent, isOver) {
     </div>
   `;
 }
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
-
-const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
 
 /** Total minutes logged per day, keyed by ISO date. */
 function minutesByDay() {
@@ -583,9 +590,6 @@ function renderResource(resource) {
 
 
 /* ========== Session logging ========== */
-
-/** The resource or project a new session will be attached to. */
-let pendingTarget = null;
 
 function newId() {
   // crypto.randomUUID needs a secure context. Falls back for local file:// use.
