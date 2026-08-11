@@ -17,7 +17,20 @@
 
   <main>
 
-    <!-- Panel 2 — Projects -->
+    <!-- Panel 2 — Activity calendar -->
+    <section id="calendar-panel">
+      <div class="panel-header">
+        <h2>Activity</h2>
+        <div class="calendar-nav">
+          <button id="calendar-prev" type="button" aria-label="Previous month">&larr;</button>
+          <span id="calendar-month"></span>
+          <button id="calendar-next" type="button" aria-label="Next month">&rarr;</button>
+        </div>
+      </div>
+      <div id="calendar-grid"></div>
+    </section>
+
+    <!-- Panel 3 — Projects -->
     <section id="projects-panel">
       <div class="panel-header">
         <h2>Projects</h2>
@@ -26,7 +39,7 @@
       <div id="projects-list"></div>
     </section>
 
-    <!-- Panel 3 — Curriculum -->
+    <!-- Panel 4 — Curriculum -->
     <section id="curriculum-panel">
       <div class="panel-header">
         <h2>Curriculum</h2>
@@ -35,7 +48,7 @@
       <div id="modules-list"></div>
     </section>
 
-    <!-- Panel 4 — Weekly schedule. Static reference content. -->
+    <!-- Panel 5 — Weekly schedule. Static reference content. -->
     <section id="schedule-panel">
       <details>
         <summary><h2>Weekly schedule</h2></summary>
