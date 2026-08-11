@@ -47,6 +47,13 @@ let state = {
 };
 
 
+/* ========== Main ====== */
+
+loadState();
+wireEvents();
+render();
+
+
 /* ========== Storage ========== */
 
 function loadState() {
@@ -760,10 +767,3 @@ function wireEvents() {
     closeSessionDialog();
   });
 }
-
-
-/* ========== Start ========== */
-
-loadState();
-wireEvents();
-render();
