@@ -367,6 +367,7 @@ function formatRating(average) {
 function render() {
   renderSummary();
   renderCalendar();
+  updateCalendarNav();
   renderProjects();
   renderCurriculum();
 }
@@ -476,30 +477,56 @@ function minutesByDay() {
   return totals;
 }
 
-/** Four intensity steps, so a glance reads density without exact figures. */
+/**
+ * Seven intensity steps in half-hour bands up to 1 h, then hourly to 4 h+.
+ * The bands are tighter at the bottom because most days land there, and a
+ * 30-minute session should look different from a two-hour one.
+ */
+const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 180, 240];
+
 function intensityLevel(minutes) {
   if (minutes === 0) {
     return 0;
   }
-  if (minutes < 60) {
-    return 1;
-  }
-  if (minutes < 120) {
-    return 2;
-  }
-  if (minutes < 240) {
-    return 3;
-  }
-  return 4;
+
+  let level = INTENSITY_THRESHOLDS.length + 1;
+
+  INTENSITY_THRESHOLDS.forEach(function (threshold, index) {
+    const isSmaller = minutes < threshold;
+    const notYetSet = level === INTENSITY_THRESHOLDS.length + 1;
+
+    if (isSmaller && notYetSet) {
+      level = index + 1;
+    }
+  });
+
+  return level;
 }
 
+/**
+ * Shows the month being viewed on the right and the one before it on the left.
+ * This is a record of what happened, so the view looks backwards — a future
+ * month would only ever be empty.
+ */
 function renderCalendar() {
-  const year = calendarMonth.getFullYear();
-  const month = calendarMonth.getMonth();
   const totals = minutesByDay();
 
+  const current = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+  const previous = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+
   const label = document.getElementById("calendar-month");
-  label.textContent = MONTH_NAMES[month] + " " + year;
+  const previousLabel = MONTH_NAMES[previous.getMonth()] + " " + previous.getFullYear();
+  const currentLabel = MONTH_NAMES[current.getMonth()] + " " + current.getFullYear();
+  label.textContent = previousLabel + " – " + currentLabel;
+
+  const container = document.getElementById("calendar-grid");
+  container.innerHTML =
+    renderMonth(previous, totals) + renderMonth(current, totals);
+}
+
+function renderMonth(monthDate, totals) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
 
   const firstOfMonth = new Date(year, month, 1);
   const weekday = firstOfMonth.getDay();
@@ -532,15 +559,46 @@ function renderCalendar() {
     `);
   }
 
-  const grid = document.getElementById("calendar-grid");
-  grid.innerHTML = headers.join("") + blanks.join("") + days.join("");
+  return `
+    <div class="cal-month">
+      <div class="cal-month-name">${MONTH_NAMES[month]}</div>
+      <div class="cal-weeks">
+        ${headers.join("")}${blanks.join("")}${days.join("")}
+      </div>
+    </div>
+  `;
 }
 
+/**
+ * Moves the view by whole months. Forward stops at the current month, since
+ * there is nothing to see beyond today.
+ */
 function shiftCalendarMonth(offset) {
   const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
-  calendarMonth = new Date(year, month + offset, 1);
+  const proposed = new Date(year, month + offset, 1);
+
+  const today = new Date();
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  if (proposed > thisMonth) {
+    return;
+  }
+
+  calendarMonth = proposed;
   renderCalendar();
+  updateCalendarNav();
+}
+
+/** Disables the forward arrow when the view is already at the current month. */
+function updateCalendarNav() {
+  const today = new Date();
+  const atCurrentMonth =
+    calendarMonth.getFullYear() === today.getFullYear() &&
+    calendarMonth.getMonth() === today.getMonth();
+
+  const nextButton = document.getElementById("calendar-next");
+  nextButton.disabled = atCurrentMonth;
 }
 
 function renderProjects() {
