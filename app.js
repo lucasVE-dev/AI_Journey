@@ -34,7 +34,9 @@
 /* ========== Configuration ========== */
 
 const JOURNEY_START = "2026-08-05";
-const WEEKLY_TARGET_HOURS = 15;
+const WEEKLY_ON_TRACK_HOURS = 12;   // keeps the curriculum on schedule
+const WEEKLY_TARGET_HOURS = 15;     // the week's actual target
+const WEEKLY_SCALE_HOURS = 20;      // full width of the weekly track
 const STORAGE_KEY = "ai-journey";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -72,7 +74,19 @@ let calendarMonth = new Date();
 let pendingTarget = null;
 
 
-/* ========== Main ========= */
+/* ========== Entry point ==================================================
+
+   Everything below this block is a function declaration. JavaScript hoists
+   those, so they can be called here before they appear in the file — no
+   forward declarations needed.
+
+   Note this only holds for `function name() {}`. A function assigned to a
+   const is not hoisted and would throw if called from here.
+
+   The same applies to values: every const and let used by these three calls,
+   however indirectly, must be declared above this block. `const` is not
+   hoisted usefully — the name exists but throws until its line runs.
+   ======================================================================== */
 
 loadState();
 wireEvents();
@@ -367,8 +381,6 @@ function renderSummary() {
   const container = document.getElementById("summary-figures");
 
   const week = hoursThisWeek();
-  const weekPercent = Math.min((week / WEEKLY_TARGET_HOURS) * 100, 100);
-  const weekOver = week > WEEKLY_TARGET_HOURS;
   const curriculumPercent = Math.min(percent, 100);
   const curriculumOver = curriculumActual > curriculumPlanned;
 
@@ -389,7 +401,7 @@ function renderSummary() {
     </div>
 
     <div class="scales">
-      ${renderScale("This week", week, WEEKLY_TARGET_HOURS, weekPercent, weekOver)}
+      ${renderWeeklyScale(week)}
       ${renderScale("Curriculum", curriculumActual, curriculumPlanned, curriculumPercent, curriculumOver)}
       <div class="scale scale--untargeted">
         <span class="scale-label">Projects</span>
@@ -400,8 +412,44 @@ function renderSummary() {
 }
 
 /**
- * A measurement against a nominal value. The tick marks the target; the fill
- * turns amber past it. Overrunning an estimate is information, not failure.
+ * The weekly reading, measured against two nominals.
+ *
+ * Below 12 h the week is behind. Between 12 and 15 it is on track — enough to
+ * keep the curriculum on schedule. Past 15 it is ahead, and the fill is
+ * allowed to keep growing rather than capping, so a strong week stays visible.
+ */
+function renderWeeklyScale(hours) {
+  let status = "behind";
+
+  if (hours >= WEEKLY_TARGET_HOURS) {
+    status = "ahead";
+  } else if (hours >= WEEKLY_ON_TRACK_HOURS) {
+    status = "on-track";
+  }
+
+  const fillPercent = Math.min((hours / WEEKLY_SCALE_HOURS) * 100, 100);
+  const onTrackPercent = (WEEKLY_ON_TRACK_HOURS / WEEKLY_SCALE_HOURS) * 100;
+  const targetPercent = (WEEKLY_TARGET_HOURS / WEEKLY_SCALE_HOURS) * 100;
+
+  return `
+    <div class="scale scale--weekly is-${status}">
+      <span class="scale-label">This week</span>
+      <span class="scale-figures">
+        ${formatHours(hours)}
+        <em>/ ${WEEKLY_ON_TRACK_HOURS}–${WEEKLY_TARGET_HOURS} h</em>
+      </span>
+      <div class="scale-track">
+        <div class="scale-fill" style="width: ${fillPercent}%"></div>
+        <div class="scale-tick scale-tick--minor" style="left: ${onTrackPercent}%"></div>
+        <div class="scale-tick scale-tick--major" style="left: ${targetPercent}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * A measurement against a single nominal value. The tick marks the target; the
+ * fill turns amber past it. Overrunning an estimate is information, not failure.
  */
 function renderScale(label, actual, nominal, fillPercent, isOver) {
   return `
