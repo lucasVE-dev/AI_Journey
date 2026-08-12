@@ -15,6 +15,7 @@
   --rule-soft: #E8EBEF;
   --signal:    #2540C8;   /* measured value */
   --over:      #B96C10;   /* past nominal */
+  --ahead:     #157F5B;   /* past the weekly target */
 
   --sans: 'Archivo', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -144,6 +145,22 @@ body {
   height: 12px;
   background: var(--ink);
 }
+
+/* The weekly scale carries two nominals, positioned along the track. */
+.scale--weekly .scale-tick { right: auto; }
+
+.scale-tick--minor {
+  height: 10px;
+  top: -2px;
+  background: var(--ink-3);
+}
+
+/* Weekly status: behind, on track, ahead. */
+.scale--weekly.is-behind .scale-fill   { background: var(--ink-3); }
+.scale--weekly.is-on-track .scale-fill { background: var(--signal); }
+.scale--weekly.is-ahead .scale-fill    { background: var(--ahead); }
+
+.scale--weekly .scale-figures em { white-space: nowrap; }
 
 .scale.is-over .scale-fill,
 .scale-track.is-over .scale-fill { background: var(--over); }
