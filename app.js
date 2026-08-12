@@ -48,6 +48,9 @@ const MONTH_NAMES = [
 
 const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
 
+/** Calendar day shading bands, in minutes. Tighter at the low end. */
+const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 180, 240];
+
 
 /* ========== State ========== */
 
@@ -482,8 +485,6 @@ function minutesByDay() {
  * The bands are tighter at the bottom because most days land there, and a
  * 30-minute session should look different from a two-hour one.
  */
-const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 180, 240];
-
 function intensityLevel(minutes) {
   if (minutes === 0) {
     return 0;
