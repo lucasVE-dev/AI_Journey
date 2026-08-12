@@ -214,12 +214,33 @@ section {
   line-height: 1;
 }
 
+.calendar-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+  border-color: var(--rule);
+  color: var(--ink);
+}
+
 #calendar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.cal-month-name {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.5rem;
+}
+
+.cal-weeks {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
-  padding: 1rem 1.25rem 1.25rem;
-  max-width: 26rem;
 }
 
 .cal-head {
@@ -259,17 +280,22 @@ section {
   align-self: flex-end;
 }
 
-/* Four steps of the signal colour: density readable at a glance. */
-.cal-day.level-1 { background: #D6DCF4; }
-.cal-day.level-2 { background: #A8B5EA; }
-.cal-day.level-3 { background: #6B80DC; }
-.cal-day.level-4 { background: var(--signal); }
+/* Seven steps of the signal colour: density readable at a glance. */
+.cal-day.level-1 { background: #E2E7F7; }
+.cal-day.level-2 { background: #C9D2F0; }
+.cal-day.level-3 { background: #AAB8E8; }
+.cal-day.level-4 { background: #8497DE; }
+.cal-day.level-5 { background: #5E76D2; }
+.cal-day.level-6 { background: #3B55C9; }
+.cal-day.level-7 { background: #1B2E8E; }
 
-.cal-day.level-3 .cal-date,
-.cal-day.level-4 .cal-date { color: rgba(255, 255, 255, 0.7); }
+.cal-day.level-5 .cal-date,
+.cal-day.level-6 .cal-date,
+.cal-day.level-7 .cal-date { color: rgba(255, 255, 255, 0.7); }
 
-.cal-day.level-3 .cal-hours,
-.cal-day.level-4 .cal-hours { color: var(--panel); }
+.cal-day.level-5 .cal-hours,
+.cal-day.level-6 .cal-hours,
+.cal-day.level-7 .cal-hours { color: var(--panel); }
 
 
 /* ===== Projects ========================================================== */
@@ -621,7 +647,7 @@ dialog textarea:focus {
 
   .resource { padding-left: 1.25rem; }
 
-  #calendar-grid { padding: 0.75rem; gap: 2px; max-width: none; }
+  #calendar-grid { grid-template-columns: 1fr; gap: 1.5rem; padding: 0.75rem; }
   .cal-hours { font-size: 0.625rem; }
   .calendar-nav span { min-width: 6.5rem; font-size: 0.6875rem; }
 
