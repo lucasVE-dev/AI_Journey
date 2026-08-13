@@ -7,17 +7,24 @@ const MODULES = [
     resources: [
       {
         id: "00-r1",
-        name: "HTML, CSS and the DOM",
-        url: "https://www.theodinproject.com",
-        description: "Odin Project Foundations. Enough to build and style a real page, entirely in the browser.",
+        name: "Odin Project Foundations — HTML, CSS, DOM",
+        url: "https://www.theodinproject.com/paths/foundations",
+        description: "Skip the opening sections on how computers and the internet work. The value is in the projects — build the calculator and etch-a-sketch cold, from an empty file, with no help.",
         plannedHours: 16
       },
       {
         id: "00-r2",
-        name: "JavaScript fundamentals",
+        name: "javascript.info — language fundamentals",
         url: "https://javascript.info",
-        description: "Arrays, objects, functions, events. The idioms that have no C++ equivalent.",
-        plannedHours: 16
+        description: "Start at 2.10 Functions. Then ch. 4 Objects, ch. 5.5 Array methods, ch. 6.3 Closures. Skip 2.1-2.9, that is C control flow in different syntax.",
+        plannedHours: 10
+      },
+      {
+        id: "00-r2b",
+        name: "javascript.info — Document and Events",
+        url: "https://javascript.info/document",
+        description: "Part 2, chapters 1 and 2. The DOM, event bubbling, delegation. This is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
+        plannedHours: 6
       },
       {
         id: "00-r3",
@@ -35,10 +42,24 @@ const MODULES = [
       },
       {
         id: "00-r5",
-        name: "Python refresher in Google Colab",
-        url: "https://colab.research.google.com",
-        description: "Recovering syntax and idioms. Runs in the browser, nothing to install.",
-        plannedHours: 12
+        name: "Automate the Boring Stuff — ch. 1-6, in Colab",
+        url: "https://automatetheboringstuff.com/2e/chapter1/",
+        description: "Move fast through ch. 2-3, they are C control flow. Slow down on ch. 4 Lists and ch. 5 Dictionaries — those two carry the language. Paste each example into a Colab cell and run it.",
+        plannedHours: 6
+      },
+      {
+        id: "00-r6",
+        name: "Python Tutor — visualising references",
+        url: "https://pythontutor.com",
+        description: "Step through code and watch variables change. Aimed at the C blind spot: b = a does not copy a list, both names point at the same one.",
+        plannedHours: 2
+      },
+      {
+        id: "00-r7",
+        name: "Exercism — Python track, first ten exercises",
+        url: "https://exercism.org/tracks/python",
+        description: "Small problems with automatic tests. Writing from an empty file, not reading. The tests are the feedback that reading does not give.",
+        plannedHours: 4
       }
     ]
   },
