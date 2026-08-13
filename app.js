@@ -48,8 +48,8 @@ const MONTH_NAMES = [
 
 const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
 
-/** Calendar day shading bands, in minutes. Tighter at the low end. */
-const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 180, 240];
+/** Calendar shading bands in minutes. See intensityLevel for the reasoning. */
+const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 150, 180, 210, 240];
 
 
 /* ========== State ========== */
@@ -481,30 +481,34 @@ function minutesByDay() {
 }
 
 /**
- * Seven intensity steps across three colour bands:
- *   levels 1-4  under 2 h   blue    below pace
- *   level  5    2-3 h       green   on track
- *   levels 6-7  3 h upward  orange  ahead
+ * Intensity in 30-minute steps up to 4 h, then one band above.
  *
- * The bands are the weekly targets projected onto a day. Two hours daily is
- * 14 h a week, inside the 12-15 on-track band; three hours is 21 h, clear of
- * the target. So a green day and a green week mean the same thing.
+ * The colour bands are the weekly targets projected onto a day: two hours
+ * daily is 14 h a week, inside the 12-15 on-track band; three hours is 21 h,
+ * clear of the target. So a green day and a green week mean the same thing.
  *
- * The 120 and 180 thresholds below are the band edges and must line up with
- * the colour groups in style.css.
+ *   levels 1-4   under 2 h    blue, deepening   below pace
+ *   levels 5-6   2 h to 3 h   green             on track
+ *   levels 7-9   3 h upward   orange            ahead
+ *
+ * Each level is an upper bound: level 4 covers 90-119 minutes, level 5 starts
+ * at exactly 120.
+ *
+ * The thresholds are minute values; a day falls in the first band it is under.
+ * These must line up with the level classes in style.css.
  */
 function intensityLevel(minutes) {
   if (minutes === 0) {
     return 0;
   }
 
-  let level = INTENSITY_THRESHOLDS.length + 1;
+  const maxLevel = INTENSITY_THRESHOLDS.length + 1;
+  let level = maxLevel;
 
   INTENSITY_THRESHOLDS.forEach(function (threshold, index) {
-    const isSmaller = minutes < threshold;
-    const notYetSet = level === INTENSITY_THRESHOLDS.length + 1;
+    const notYetSet = level === maxLevel;
 
-    if (isSmaller && notYetSet) {
+    if (minutes < threshold && notYetSet) {
       level = index + 1;
     }
   });
@@ -512,11 +516,6 @@ function intensityLevel(minutes) {
   return level;
 }
 
-/**
- * Shows the month being viewed on the right and the one before it on the left.
- * This is a record of what happened, so the view looks backwards — a future
- * month would only ever be empty.
- */
 function renderCalendar() {
   const totals = minutesByDay();
 
