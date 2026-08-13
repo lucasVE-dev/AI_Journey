@@ -481,9 +481,17 @@ function minutesByDay() {
 }
 
 /**
- * Seven intensity steps in half-hour bands up to 1 h, then hourly to 4 h+.
- * The bands are tighter at the bottom because most days land there, and a
- * 30-minute session should look different from a two-hour one.
+ * Seven intensity steps across three colour bands:
+ *   levels 1-4  under 2 h   blue    below pace
+ *   level  5    2-3 h       green   on track
+ *   levels 6-7  3 h upward  orange  ahead
+ *
+ * The bands are the weekly targets projected onto a day. Two hours daily is
+ * 14 h a week, inside the 12-15 on-track band; three hours is 21 h, clear of
+ * the target. So a green day and a green week mean the same thing.
+ *
+ * The 120 and 180 thresholds below are the band edges and must line up with
+ * the colour groups in style.css.
  */
 function intensityLevel(minutes) {
   if (minutes === 0) {
