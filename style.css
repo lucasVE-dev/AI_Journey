@@ -280,19 +280,22 @@ section {
   align-self: flex-end;
 }
 
-/* Seven steps of the signal colour: density readable at a glance. */
+/* Seven steps across three bands: blue below 2 h, green to 3 h, orange past it.
+   Levels 1-4 are under 2 h, level 5 is 2-3 h, levels 6-7 are 3 h and above. */
 .cal-day.level-1 { background: #E2E7F7; }
 .cal-day.level-2 { background: #C9D2F0; }
 .cal-day.level-3 { background: #AAB8E8; }
-.cal-day.level-4 { background: #8497DE; }
-.cal-day.level-5 { background: #5E76D2; }
-.cal-day.level-6 { background: #3B55C9; }
-.cal-day.level-7 { background: #1B2E8E; }
+.cal-day.level-4 { background: #6B80DC; }
+.cal-day.level-5 { background: #2E9E72; }
+.cal-day.level-6 { background: #E08A3C; }
+.cal-day.level-7 { background: #C96A15; }
 
+.cal-day.level-4 .cal-date,
 .cal-day.level-5 .cal-date,
 .cal-day.level-6 .cal-date,
-.cal-day.level-7 .cal-date { color: rgba(255, 255, 255, 0.7); }
+.cal-day.level-7 .cal-date { color: rgba(255, 255, 255, 0.75); }
 
+.cal-day.level-4 .cal-hours,
 .cal-day.level-5 .cal-hours,
 .cal-day.level-6 .cal-hours,
 .cal-day.level-7 .cal-hours { color: var(--panel); }
