@@ -16,15 +16,8 @@ const MODULES = [
         id: "00-r2",
         name: "javascript.info — language fundamentals",
         url: "https://javascript.info",
-        description: "Start at 2.10 Functions. Then ch. 4 Objects, ch. 5.5 Array methods, ch. 6.3 Closures. Skip 2.1-2.9, that is C control flow in different syntax.",
-        plannedHours: 10
-      },
-      {
-        id: "00-r2b",
-        name: "javascript.info — Document and Events",
-        url: "https://javascript.info/document",
-        description: "Part 2, chapters 1 and 2. The DOM, event bubbling, delegation. This is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
-        plannedHours: 6
+        description: "Objects,Array methods, functions, the DOM, event bubbling, delegation...",
+        plannedHours: 20
       },
       {
         id: "00-r3",
