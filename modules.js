@@ -36,7 +36,7 @@ const MODULES = [
       {
         id: "00-r5",
         name: "Automate the Boring Stuff — ch. 1-6, in Colab",
-        url: "https://automatetheboringstuff.com/2e/chapter1/",
+        url: "https://automatetheboringstuff.com/3e/",
         description: "Move fast through ch. 2-3, they are C control flow. Slow down on ch. 4 Lists and ch. 5 Dictionaries — those two carry the language. Paste each example into a Colab cell and run it.",
         plannedHours: 6
       },
