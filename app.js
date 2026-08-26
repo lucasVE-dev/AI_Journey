@@ -668,7 +668,7 @@ function renderModule(module) {
       <summary>
         <span class="module-id">${module.id}</span>
         <span class="module-name">${module.name}</span>
-        <span class="module-month">${module.month} · ${completedCountFor(module)}/${module.resources.length} done</span>
+        <span class="module-meta">${module.month} · ${completedCountFor(module)} of ${module.resources.length} done</span>
         <span class="module-hours">${formatHours(actual)} <em>/ ${planned} h</em></span>
         <div class="scale-track ${isOver ? "is-over" : ""}">
           <div class="scale-fill" style="width: ${fillPercent}%"></div>
@@ -676,6 +676,9 @@ function renderModule(module) {
         </div>
       </summary>
       <div class="resources">
+        <p class="module-deliverable">
+          <span>Done when</span> ${module.deliverable}
+        </p>
         ${resourceRows}
       </div>
     </details>
