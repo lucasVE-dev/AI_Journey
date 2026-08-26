@@ -383,7 +383,7 @@ section {
 
 .module-name { font-size: 0.9375rem; font-weight: 500; }
 
-.module-month {
+.module-meta {
   grid-column: 2;
   grid-row: 2;
   font-size: 0.6875rem;
@@ -415,6 +415,23 @@ section {
 .resources {
   background: #FAFBFC;
   border-top: 1px solid var(--rule-soft);
+}
+
+.module-deliverable {
+  margin: 0;
+  padding: 0.75rem 1.25rem 0.75rem 3.125rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.module-deliverable span {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-right: 0.5rem;
 }
 
 .resource {
@@ -660,6 +677,7 @@ dialog textarea:focus {
   }
 
   .resource { padding-left: 1.25rem; }
+  .module-deliverable { padding-left: 1.25rem; }
 
   #calendar-grid { grid-template-columns: 1fr; gap: 1.5rem; padding: 0.75rem; }
   .cal-hours { font-size: 0.625rem; }
