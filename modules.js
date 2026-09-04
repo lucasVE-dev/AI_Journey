@@ -14,17 +14,10 @@ const MODULES = [
       },
       {
         id: "00-r2",
-        name: "javascript.info — language fundamentals",
+        name: "javascript.info — language and the DOM",
         url: "https://javascript.info",
-        description: "Start at 2.10 Functions. Then ch. 4 Objects, ch. 5.5 Array methods, ch. 6.3 Closures. Skip 2.1-2.9, that is C control flow in different syntax.",
-        plannedHours: 20
-      },
-      {
-        id: "00-r2b",
-        name: "javascript.info — Document and Events",
-        url: "https://javascript.info/document",
-        description: "Part 2, chapters 1 and 2. The DOM, event bubbling, delegation. This is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
-        plannedHours: 6
+        description: "Start at 2.10 Functions. Then ch. 4 Objects, ch. 5.5 Array methods, ch. 6.3 Closures. Skip 2.1-2.9, that is C control flow in different syntax. Then Part 2, ch. 1-2: the DOM, event bubbling, delegation. That part is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
+        plannedHours: 26
       },
       {
         id: "00-r3",
@@ -42,17 +35,10 @@ const MODULES = [
       },
       {
         id: "00-r5",
-        name: "Automate the Boring Stuff — ch. 1-6, in Colab",
-        url: "https://automatetheboringstuff.com/2e/chapter1/",
-        description: "Move fast through ch. 2-3, they are C control flow. Slow down on ch. 4 Lists and ch. 5 Dictionaries — those two carry the language. Paste each example into a Colab cell and run it.",
+        name: "Automate the Boring Stuff — ch. 1-8, in Colab",
+        url: "https://automatetheboringstuff.com/3e/chapter1.html",
+        description: "3rd edition. Move fast through ch. 2-3, they are C control flow. Slow down on ch. 6 Lists and ch. 7 Dictionaries — those two carry the language. Paste each example into a Colab cell and run it.",
         plannedHours: 6
-      },
-      {
-        id: "00-r6",
-        name: "Python Tutor — visualising references",
-        url: "https://pythontutor.com",
-        description: "Step through code and watch variables change. Aimed at the C blind spot: b = a does not copy a list, both names point at the same one.",
-        plannedHours: 2
       },
       {
         id: "00-r7",
@@ -72,10 +58,10 @@ const MODULES = [
     resources: [
       {
         id: "01-r1",
-        name: "Linux and the command line",
+        name: "Linux and the command line — basics only",
         url: "https://linuxjourney.com",
-        description: "Filesystem, permissions, users, processes, systemd, SSH, pipes. Follow the RHCSA objectives as a syllabus without sitting the exam. Every container and every server you touch is Linux.",
-        plannedHours: 16
+        description: "Filesystem, permissions, processes, pipes and redirects — enough to be dangerous in a terminal. Skip the systemd, networking and SSH-server tracks here; they land naturally in module 07 when you are actually running a container on a remote box.",
+        plannedHours: 6
       },
       {
         id: "01-r2",
@@ -86,16 +72,16 @@ const MODULES = [
       },
       {
         id: "01-r3",
-        name: "Git beyond commits",
+        name: "Git — branching and pull requests",
         url: "https://learngitbranching.js.org",
-        description: "Branches, merges, conflicts, pull requests, rebase, reading a diff. Committing to main is not the skill a job needs. Interactive and free.",
-        plannedHours: 8
+        description: "Just the introduction sequence: branch, merge, a pull request on GitHub. This module's own deliverable needs a branch and a PR, so that much can't wait for the job. Skip rebase and the advanced sequences — a real conflict on real work teaches those faster than a simulator does.",
+        plannedHours: 3
       },
       {
         id: "01-r4",
-        name: "Automate the Boring Stuff — ch. 7-9, 12-18",
-        url: "https://automatetheboringstuff.com",
-        description: "Regex, files, Excel, PDFs, web scraping. The chapters that need a real filesystem, which is why they waited for the Mac.",
+        name: "Automate the Boring Stuff — ch. 9-11, 13-20",
+        url: "https://automatetheboringstuff.com/3e/chapter9.html",
+        description: "3rd edition. Regex, files, organizing files, Excel, Google Sheets, PDFs, web scraping, scheduling, email. The chapters that need a real filesystem, which is why they waited for the Mac.",
         plannedHours: 18
       },
       {
