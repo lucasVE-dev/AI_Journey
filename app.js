@@ -435,7 +435,7 @@ function renderWeeklyScale(hours) {
 
   return `
     <div class="scale scale--weekly is-${status}">
-      <span class="scale-label">This week</span>
+      <span class="scale-label">Last 7 Days</span>
       <span class="scale-figures">
         ${formatHours(hours)}
         <em>/ ${WEEKLY_ON_TRACK_HOURS}–${WEEKLY_TARGET_HOURS} h</em>
