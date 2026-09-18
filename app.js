@@ -243,18 +243,16 @@ function toDateOnly(value) {
   return date;
 }
 
-/** Monday of the week containing the given date. */
+/** The date of start of the actual week (last 7 days) */
 function startOfWeek(value) {
-  const date = toDateOnly(value);
-  const weekday = date.getDay();                  // 0 = Sunday
-  const daysSinceMonday = weekday === 0 ? 6 : weekday - 1;
-  date.setDate(date.getDate() - daysSinceMonday);
+  const date = toDateOnly(value);                 
+  date.setDate(date.getDate() - 6);
   return date;
 }
 
 function hoursThisWeek() {
-  const monday = startOfWeek(new Date());
-  const thisWeek = state.sessions.filter(session => toDateOnly(session.date) >= monday);
+  const sevendaysago = startOfWeek(new Date());
+  const thisWeek = state.sessions.filter(session => toDateOnly(session.date) >= sevendaysago);
   const minutes = sumMinutes(thisWeek);
   return minutes / 60;
 }
@@ -437,7 +435,7 @@ function renderWeeklyScale(hours) {
 
   return `
     <div class="scale scale--weekly is-${status}">
-      <span class="scale-label">This week</span>
+      <span class="scale-label">Last 7 Days</span>
       <span class="scale-figures">
         ${formatHours(hours)}
         <em>/ ${WEEKLY_ON_TRACK_HOURS}–${WEEKLY_TARGET_HOURS} h</em>
