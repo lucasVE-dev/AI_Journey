@@ -7,17 +7,17 @@ const MODULES = [
     resources: [
       {
         id: "00-r1",
-        name: "Odin Project Foundations — the projects only",
+        name: "Odin Project Foundations — CSS, HTML, & First Webpages",
         url: "https://www.theodinproject.com/paths/foundations",
-        description: "Skip the sections on how computers and the internet work. Build the calculator and etch-a-sketch cold, from an empty file, with no help. Generating code is a different skill from reading it.",
-        plannedHours: 10
+        description: "Learning the foundations of CSS and HTML and completing The Odin project up to Javascript ",
+        plannedHours: 15
       },
       {
         id: "00-r2",
         name: "javascript.info — language and the DOM",
         url: "https://javascript.info",
-        description: "Start at 2.10 Functions. Then ch. 4 Objects, ch. 5.5 Array methods, ch. 6.3 Closures. Skip 2.1-2.9, that is C control flow in different syntax. Then Part 2, ch. 1-2: the DOM, event bubbling, delegation. That part is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
-        plannedHours: 26
+        description: "All part 1, from basic to all data types tart at 2.10 Functions. Then Part 2, ch. 1-2: the DOM, event bubbling, delegation. That part is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
+        plannedHours: 20
       },
       {
         id: "00-r3",
@@ -46,7 +46,14 @@ const MODULES = [
         url: "https://exercism.org/tracks/python",
         description: "Small problems with automatic tests. Writing from an empty file, not reading. The tests are the feedback that reading does not give.",
         plannedHours: 4
-      }
+      },
+      {
+        id: "00-r8",
+        name: "Odin Project Foundations — Javascript & Projects",
+        url: "https://www.theodinproject.com/paths/foundations",
+        description: "Javascript sections and projects such as rock,paper,scissors, calculator and etch-a-sketch cold, from an empty file, all from scrath and no AI",
+        plannedHours: 20
+      },
     ]
   },
 
