@@ -298,6 +298,55 @@ function currentStreak() {
 }
 
 /**
+ * Minutes logged in the 7 days ending on (and including) the given date.
+ * dayTotals is the result of minutesByDay(), passed in so a caller that checks
+ * many windows builds it once instead of once per window.
+ */
+function minutesInSevenDaysEnding(endDate, dayTotals) {
+  const cursor = toDateOnly(endDate);
+  let minutes = 0;
+
+  for (let i = 0; i < 7; i++) {
+    minutes += dayTotals[isoDate(cursor)] || 0;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return minutes;
+}
+
+/**
+ * How many days, in total, had a trailing 7-day window of at least
+ * WEEKLY_ON_TRACK_HOURS. Not a streak: a bad week does not reset it, and days
+ * are never un-counted. It only goes down if a session is deleted or edited.
+ *
+ * Walks every day from the first logged session up to today. Days before the
+ * first session cannot qualify (their window is empty), so there is no reason
+ * to start earlier. Days after today are ignored, so a future-dated session
+ * does not count until its date arrives.
+ */
+function daysOnPace() {
+  if (state.sessions.length === 0) {
+    return 0;
+  }
+
+  const dayTotals = minutesByDay();
+  const requiredMinutes = WEEKLY_ON_TRACK_HOURS * 60;
+
+  // ISO dates sort correctly as plain strings, so the earliest is the minimum.
+  const firstDate = state.sessions.map(session => session.date).sort()[0];
+  const cursor = toDateOnly(firstDate);
+  const today = toDateOnly(new Date());
+
+  let count = 0;
+  while (cursor <= today) {
+    if (minutesInSevenDaysEnding(cursor, dayTotals) >= requiredMinutes) {
+      count += 1;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+
+/**
  * Formats a date as YYYY-MM-DD using local calendar parts.
  *
  * toISOString() would convert to UTC first, which shifts the date by one day
@@ -399,6 +448,10 @@ function renderSummary() {
       <div class="readout">
         <span class="readout-value">${currentStreak()}</span>
         <span class="readout-label">Day streak</span>
+      </div>
+      <div class="readout" title="Days on which the last 7 days totalled at least ${WEEKLY_ON_TRACK_HOURS} h. A running total; it never resets.">
+        <span class="readout-value">${daysOnPace()}</span>
+        <span class="readout-label">Days on pace</span>
       </div>
     </div>
 

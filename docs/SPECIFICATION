@@ -154,6 +154,7 @@ heavier curriculum implies heavier weeks.
 | Weekly target | Curriculum planned total ÷ weeks in journey |
 | Week counter | Weeks elapsed since `JOURNEY_START`, against total |
 | Streak | Consecutive days ending today with at least one session |
+| Days on pace | Count of days, from the first session to today, on which the 7 days ending that day totalled at least the on-track threshold (12 h). A running total, not a streak — it never resets |
 
 An unrated resource and a badly rated resource must be visually distinct.
 
