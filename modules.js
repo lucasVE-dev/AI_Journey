@@ -14,9 +14,9 @@ const MODULES = [
       },
       {
         id: "00-r2",
-        name: "javascript.info — language and the DOM",
+        name: "Learn Javascript fundamentals with javascript.info",
         url: "https://javascript.info",
-        description: "All part 1, from basic to all data types tart at 2.10 Functions. Then Part 2, ch. 1-2: the DOM, event bubbling, delegation. That part is the browser, not the language, and it is the gap that makes wireEvents hard to read.",
+        description: "All part 1, from basic to all data types tart at 2.10 Functions.",
         plannedHours: 20
       },
       {
@@ -42,10 +42,10 @@ const MODULES = [
       },
       {
         id: "00-r7",
-        name: "Exercism — Python track, first ten exercises",
+        name: "Exercism — Python track, practice until feeling confortable solving easy problem",
         url: "https://exercism.org/tracks/python",
         description: "Small problems with automatic tests. Writing from an empty file, not reading. The tests are the feedback that reading does not give.",
-        plannedHours: 4
+        plannedHours: 6
       },
       {
         id: "00-r8",
