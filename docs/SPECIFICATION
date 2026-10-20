@@ -132,7 +132,7 @@ Two values, defined once:
 
 ```
 JOURNEY_START   "2026-08-05"
-JOURNEY_END     "2027-03-31"
+JOURNEY_END     "2027-08-31"
 ```
 
 The weekly target is derived, not configured: total planned curriculum hours

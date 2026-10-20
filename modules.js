@@ -2,7 +2,7 @@ const MODULES = [
   {
     id: "00",
     name: "Foundations, browser only",
-    month: "August 2026",
+    month: "August–September 2026",
     deliverable: "This tracker, built and deployed on GitHub Pages",
     resources: [
       {
@@ -60,13 +60,13 @@ const MODULES = [
   {
     id: "01",
     name: "The working environment",
-    month: "September 2026",
+    month: "September–November 2026",
     deliverable: "A script that reads files, sends them to a model, and writes a useful result — in a virtualenv, on a branch, merged via pull request",
     resources: [
       {
         id: "01-r1",
         name: "Linux and the command line — basics only",
-        url: "https://linuxjourney.com",
+        url: "https://labex.io/linuxjourney",
         description: "Filesystem, permissions, processes, pipes and redirects — enough to be dangerous in a terminal. Skip the systemd, networking and SSH-server tracks here; they land naturally in module 07 when you are actually running a container on a remote box.",
         plannedHours: 6
       },
@@ -93,9 +93,9 @@ const MODULES = [
       },
       {
         id: "01-r5",
-        name: "Python for Everybody — APIs and JSON",
-        url: "https://www.py4e.com",
-        description: "requests, JSON, HTTP status codes, pagination, rate limits. The foundation of everything that follows.",
+        name: "Python for Everybody — ch. 14 Web Services and ch. 15 Objects",
+        url: "https://www.py4e.com/lessons",
+        description: "JSON and calling web APIs, then classes and objects — Automate the Boring Stuff never teaches classes, and every library from here on is built from them. The book fetches with urllib; write the exercises with requests instead, which you already met in the web scraping chapter.",
         plannedHours: 10
       },
       {
@@ -106,18 +106,18 @@ const MODULES = [
         plannedHours: 10
       },
       {
-        id: "01-r7",
-        name: "Anthropic Academy — Claude API course",
-        url: "https://www.anthropic.com/learn",
-        description: "Official API documentation structured as a course. Messages, system prompts, tool use, streaming.",
-        plannedHours: 8
+        id: "01-r9",
+        name: "How language models work — AI capabilities and limitations",
+        url: "https://academy.claude.com/courses/ai-capabilities-and-limitations",
+        description: "Tokens, next-token prediction, context windows, why hallucination happens. Conceptual, not mathematical. Learned before building on models, not four months after.",
+        plannedHours: 4
       },
       {
-        id: "01-r8",
-        name: "Prompt engineering for developers",
-        url: "https://www.deeplearning.ai/short-courses/",
-        description: "Talking to a model from code rather than from a chat window. Structured outputs, few-shot, when examples hurt.",
-        plannedHours: 4
+        id: "01-r7",
+        name: "Anthropic Academy — Building with the Claude API",
+        url: "https://anthropic.skilljar.com/",
+        description: "Free, about 8-9h of video in total. Do the sections up to and including tool use: messages, system prompts, prompt engineering, prompt evaluation, structured output, tool use. The RAG, MCP and agent sections wait for modules 04 and 05.",
+        plannedHours: 10
       }
     ]
   },
@@ -125,35 +125,56 @@ const MODULES = [
   {
     id: "02",
     name: "Automation and pipelines",
-    month: "October 2026",
+    month: "November–December 2026",
     deliverable: "Three working automations, one solving a real problem at work, one running on a schedule without a platform",
     resources: [
       {
         id: "02-r1",
-        name: "n8n Academy — Level 1",
-        url: "https://docs.n8n.io/courses/",
-        description: "Official certified course. Open source, self-hostable, allows dropping into code.",
-        plannedHours: 12
+        name: "n8n Academy — N8N101 Essentials",
+        url: "https://learn.n8n.io/",
+        description: "Free, with a badge. First workflows: triggers, nodes, data moving between them. Open source, self-hostable, allows dropping into code.",
+        plannedHours: 4
       },
       {
         id: "02-r2",
-        name: "n8n Academy — Level 2",
-        url: "https://docs.n8n.io/courses/",
-        description: "Conditional logic, error handling, webhooks, retries. Your instinct for flags and state machines is an advantage here.",
-        plannedHours: 12
+        name: "n8n Academy — N8N102 Integrations",
+        url: "https://learn.n8n.io/",
+        description: "Free, with a badge. APIs, webhooks, conditional logic and error handling.",
+        plannedHours: 5
       },
       {
         id: "02-r3",
-        name: "AI nodes in n8n",
-        url: "https://docs.n8n.io",
-        description: "Models inside a workflow. Where module 01 and module 02 meet, and the exact hybrid profile that gets hired.",
-        plannedHours: 10
+        name: "n8n Academy — N8N103 AI, testing and best practices",
+        url: "https://learn.n8n.io/",
+        description: "Free, with a badge. Models and agents inside a workflow, and testing workflows before trusting them.",
+        plannedHours: 5
       },
       {
         id: "02-r4",
         name: "GitHub Actions — CI and scheduled jobs",
         url: "https://docs.github.com/en/actions",
         description: "Cron, triggers, running tests on every push, secrets. Automation that needs no platform underneath it. Free on public repositories.",
+        plannedHours: 10
+      },
+      {
+        id: "02-r5",
+        name: "Build — an automation that solves a real problem at work",
+        url: "",
+        description: "Pick something done by hand every week and remove it. n8n or Python, whichever fits. Measure the time it saves; that number goes on the CV.",
+        plannedHours: 10
+      },
+      {
+        id: "02-r6",
+        name: "Build — an n8n workflow with a model in it",
+        url: "",
+        description: "A workflow where a model reads, classifies or drafts something, with error handling for when it fails or returns nonsense.",
+        plannedHours: 10
+      },
+      {
+        id: "02-r7",
+        name: "Build — a scheduled job on GitHub Actions",
+        url: "",
+        description: "A Python script that runs on a schedule with no platform underneath it, secrets kept out of the repository.",
         plannedHours: 10
       }
     ]
@@ -162,15 +183,29 @@ const MODULES = [
   {
     id: "03",
     name: "First deployed app",
-    month: "November 2026",
-    deliverable: "A web app on a public URL that uses a model, handles failure gracefully, and has tests",
+    month: "January–February 2027",
+    deliverable: "A FastAPI backend with a plain HTML, CSS and JavaScript front end, on a public URL, that uses a model, handles failure gracefully, and has tests",
     resources: [
       {
         id: "03-r1",
-        name: "Streamlit — official tutorial",
+        name: "Streamlit — prototype first",
         url: "https://docs.streamlit.io/get-started",
-        description: "Python into a web app without writing frontend code. The fastest route from script to something someone else can use.",
-        plannedHours: 10
+        description: "Python into a web page without writing front-end code. Prototype this module's app in Streamlit first, then build it properly with FastAPI. Streamlit is how teams make internal demos and data tools; FastAPI is how a product serves a model.",
+        plannedHours: 6
+      },
+      {
+        id: "03-r7",
+        name: "Pydantic and Python type hints",
+        url: "https://pydantic.dev/docs/validation/latest/get-started/",
+        description: "Type hints first, then models that validate data where it enters the program. FastAPI request bodies, structured model output and every agent framework are built on this.",
+        plannedHours: 6
+      },
+      {
+        id: "03-r8",
+        name: "FastAPI and REST design",
+        url: "https://fastapi.tiangolo.com/tutorial/",
+        description: "Building a service other things can call, not just an app people click. Async endpoints, dependency injection, request validation. The front end is the HTML, CSS and JavaScript from module 00 — no framework.",
+        plannedHours: 16
       },
       {
         id: "03-r2",
@@ -183,8 +218,8 @@ const MODULES = [
         id: "03-r3",
         name: "Error handling for API calls",
         url: "https://tenacity.readthedocs.io",
-        description: "Retries with backoff, timeouts, rate limits, graceful degradation. The line between a demo and something a client can use.",
-        plannedHours: 8
+        description: "Retries with backoff, timeouts, rate limits, graceful degradation. The Claude SDK already retries some failures; learn what it covers and where your own handling starts. The line between a demo and something a client can use.",
+        plannedHours: 3
       },
       {
         id: "03-r4",
@@ -196,16 +231,9 @@ const MODULES = [
       {
         id: "03-r5",
         name: "Deployment, secrets and environment variables",
-        url: "https://share.streamlit.io",
-        description: "A public URL with API keys kept out of the repository. One leaked key on a public repo is a three-figure bill.",
+        url: "https://fastapi.tiangolo.com/deployment/",
+        description: "A public URL for the FastAPI app, with API keys kept out of the repository. One leaked key on a public repo is a three-figure bill.",
         plannedHours: 6
-      },
-      {
-        id: "03-r6",
-        name: "Practical AI app bootcamp",
-        url: "",
-        description: "Udemy, in a sale. Structured build-along for a full app. Assess it before committing the hours — replace with an equivalent if it disappoints.",
-        plannedHours: 12
       }
     ]
   },
@@ -213,16 +241,9 @@ const MODULES = [
   {
     id: "04",
     name: "Retrieval over your own data",
-    month: "December 2026",
+    month: "February–March 2027",
     deliverable: "A deployed assistant answering questions over real documents, with citations and a retrieval eval",
     resources: [
-      {
-        id: "04-r1",
-        name: "LangChain for LLM application development",
-        url: "https://www.deeplearning.ai/short-courses/",
-        description: "Taught by the creator of LangChain. Chains, memory, document loaders.",
-        plannedHours: 4
-      },
       {
         id: "04-r2",
         name: "Embeddings and vector databases",
@@ -233,7 +254,7 @@ const MODULES = [
       {
         id: "04-r3",
         name: "Chunking and document preparation",
-        url: "https://python.langchain.com",
+        url: "https://docs.langchain.com",
         description: "Most bad RAG systems are chunking problems, not model problems. Overlap, metadata, structure-aware splitting.",
         plannedHours: 6
       },
@@ -257,6 +278,13 @@ const MODULES = [
         url: "https://supabase.com/docs",
         description: "Tables, migrations, auth, row-level security. Directly unblocks the v2 migration of the tracker.",
         plannedHours: 8
+      },
+      {
+        id: "04-r7",
+        name: "Retrieval evaluation",
+        url: "https://hamel.dev/notes/llm/rag/index.html",
+        description: "Twenty to thirty real questions, each paired with the chunk that answers it. Measure recall@k and MRR, and rerun after every chunking or embedding change. This module's deliverable needs it, so it cannot wait for module 06.",
+        plannedHours: 4
       }
     ]
   },
@@ -264,49 +292,35 @@ const MODULES = [
   {
     id: "05",
     name: "Agents and orchestration",
-    month: "January 2027",
+    month: "March–April 2027",
     deliverable: "An agent completing a multi-step task using at least two external tools, with concurrent calls and failure handling",
     resources: [
       {
         id: "05-r1",
         name: "Agentic AI — full course",
-        url: "https://www.deeplearning.ai",
-        description: "Framework-agnostic foundations. Planning, reflection, tool use, multi-agent patterns. Start here before touching any library.",
-        plannedHours: 12
+        url: "https://www.deeplearning.ai/courses/agentic-ai/",
+        description: "Andrew Ng, about 10h of video plus labs. Patterns built from first principles before any framework: planning, reflection, tool use, multi-agent. Start here before touching any library.",
+        plannedHours: 15
       },
       {
         id: "05-r2",
         name: "Hugging Face AI Agents Course",
-        url: "https://huggingface.co/learn",
-        description: "Hands-on, with a free certificate worth listing.",
-        plannedHours: 14
+        url: "https://huggingface.co/learn/agents-course/unit0/introduction",
+        description: "Hands-on with smolagents, LlamaIndex and LangGraph — the frameworks job postings name. Free certificate, no deadline.",
+        plannedHours: 18
       },
       {
         id: "05-r3",
         name: "Model Context Protocol",
-        url: "https://www.anthropic.com/learn",
-        description: "The standard for connecting models to external tools. Emerging in 2026, so early is an advantage.",
+        url: "https://anthropic.skilljar.com/",
+        description: "Introduction to Model Context Protocol, then Advanced Topics if the agent needs them. The standard way to connect models to tools and data since 2025.",
         plannedHours: 6
-      },
-      {
-        id: "05-r4",
-        name: "How language models actually work",
-        url: "https://www.deeplearning.ai/short-courses/",
-        description: "Tokens, embeddings, attention, context windows, why hallucination happens. Conceptual, not mathematical. This is what interviews probe when they ask why a system failed.",
-        plannedHours: 8
       },
       {
         id: "05-r5",
         name: "Multi-provider routing and cost engineering",
         url: "https://docs.litellm.ai",
         description: "Routing by task, prompt caching economics, token accounting, fallbacks between providers. Single-provider lock-in is over and cost is a design constraint, not an afterthought.",
-        plannedHours: 10
-      },
-      {
-        id: "05-r6",
-        name: "Agents inside n8n",
-        url: "",
-        description: "Udemy, in a sale. Joins module 02 and module 05: agents running in a workflow platform. The hybrid profile again.",
         plannedHours: 10
       }
     ]
@@ -315,21 +329,14 @@ const MODULES = [
   {
     id: "06",
     name: "Evaluation and production reliability",
-    month: "February 2027",
+    month: "April–May 2027",
     deliverable: "One earlier project with an eval harness, a tracing setup, and a written failure analysis",
     resources: [
       {
-        id: "06-r1",
-        name: "Building and evaluating advanced RAG",
-        url: "https://www.deeplearning.ai/short-courses/",
-        description: "Retrieval metrics, groundedness, answer relevance. The evaluation half is what separates a demo from a product.",
-        plannedHours: 8
-      },
-      {
         id: "06-r2",
         name: "Designing an eval harness from scratch",
-        url: "https://github.com/openai/evals",
-        description: "Build your own: golden dataset, metrics, regression runs on every change. Expect to be asked in every interview what eval you designed, what it measured, and what it caught. Having no answer marks you as someone who has never shipped.",
+        url: "https://hamel.dev/notes/llm/evals/",
+        description: "Hamel Husain's free guides: error analysis first, then a golden dataset, metrics, LLM-as-judge validated against your own labels, and regression runs on every change. Expect to be asked in every interview what eval you designed, what it measured, and what it caught. Having no answer marks you as someone who has never shipped.",
         plannedHours: 16
       },
       {
@@ -342,14 +349,14 @@ const MODULES = [
       {
         id: "06-r4",
         name: "Prompt injection and LLM security",
-        url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
-        description: "OWASP Top 10 for LLM applications. A real attack surface the moment a model touches untrusted input or has tools.",
+        url: "https://genai.owasp.org/llm-top-10/",
+        description: "OWASP Top 10 for LLM applications, 2025 edition. A real attack surface the moment a model touches untrusted input or has tools.",
         plannedHours: 8
       },
       {
         id: "06-r5",
         name: "Structured outputs and guardrails",
-        url: "https://www.anthropic.com/learn",
+        url: "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
         description: "Schema-constrained responses, validation, refusal handling, escape hatches in system prompts.",
         plannedHours: 6
       }
@@ -358,17 +365,10 @@ const MODULES = [
 
   {
     id: "07",
-    name: "Services, containers and the cloud",
-    month: "March 2027",
-    deliverable: "A containerised API serving an earlier project, deployed on AWS",
+    name: "Containers and the cloud",
+    month: "May–June 2027",
+    deliverable: "The module 03 FastAPI app, containerised and deployed on AWS",
     resources: [
-      {
-        id: "07-r1",
-        name: "FastAPI and REST design",
-        url: "https://fastapi.tiangolo.com/tutorial/",
-        description: "Building a service other things can call, not just an app people click. Async endpoints, dependency injection, request validation. This is what job descriptions mean by AI engineer.",
-        plannedHours: 16
-      },
       {
         id: "07-r2",
         name: "Docker fundamentals",
@@ -380,7 +380,7 @@ const MODULES = [
         id: "07-r3",
         name: "AWS core services",
         url: "https://aws.amazon.com/getting-started/",
-        description: "IAM, S3, EC2, VPC basics, Lambda, ECS. AWS appears in roughly a third of AI engineering postings and dominates the Australian market.",
+        description: "IAM, S3, EC2, VPC basics, Lambda, ECS. Cloud platforms appear in more than half of AI engineering postings; the concepts carry over between providers.",
         plannedHours: 20
       },
       {
@@ -396,7 +396,7 @@ const MODULES = [
   {
     id: "08",
     name: "AWS Solutions Architect Associate",
-    month: "April 2027",
+    month: "June–July 2027",
     deliverable: "SAA-C03 passed",
     resources: [
       {
@@ -419,14 +419,14 @@ const MODULES = [
   {
     id: "09",
     name: "One production-grade system",
-    month: "May 2027",
+    month: "July–August 2027",
     deliverable: "A single project taken to production quality, with metrics you can quote in an interview",
     resources: [
       {
         id: "09-r1",
         name: "Take one project to production",
         url: "",
-        description: "Real auth, a real database, deployed on AWS, containerised, tested, traced, cost-controlled. Pick the industrial-domain one: 75 percent of AI postings now want domain specialisation, and electromechanical engineering is yours.",
+        description: "Real auth, a real database, deployed on AWS, containerised, tested, traced, cost-controlled. Pick the industrial-domain one: electromechanical engineering is a specialisation most applicants do not have.",
         plannedHours: 40
       },
       {
