@@ -75,7 +75,7 @@ const MODULES = [
         name: "Python environments and dependencies",
         url: "https://docs.astral.sh/uv/",
         description: "venv, requirements.txt, lockfiles, uv. Why pip install without an environment breaks things later. This is the first thing you hit on a new machine and nothing works without it.",
-        plannedHours: 6
+        plannedHours: 3
       },
       {
         id: "01-r3",
@@ -86,9 +86,9 @@ const MODULES = [
       },
       {
         id: "01-r4",
-        name: "Automate the Boring Stuff — ch. 9-11, 13-20",
+        name: "Automate the Boring Stuff — ch. 9-13",
         url: "https://automatetheboringstuff.com/3e/chapter9.html",
-        description: "3rd edition. Regex, files, organizing files, Excel, Google Sheets, PDFs, web scraping, scheduling, email. The chapters that need a real filesystem, which is why they waited for the Mac.",
+        description: "3rd edition. Regex, files, organizing files,  web scraping. ",
         plannedHours: 18
       },
       {
