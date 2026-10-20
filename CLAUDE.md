@@ -48,6 +48,7 @@ style.css       Styles
 app.js          Application logic
 modules.js      Curriculum reference data
 docs/SPECIFICATION.md
+docs/CURRICULUM-LOG.md   Why the curriculum changed. Read before editing modules.js
 ```
 
 Four source files. Not one more until splitting them is genuinely painful.
