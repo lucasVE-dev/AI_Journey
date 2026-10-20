@@ -18,6 +18,8 @@ mistake.
 3. **Prefer resources with feedback.**
 4. **Merge resources that cover the same ground.**
 5. **Everything takes longer than planned.**
+6. **Check a resource before planning hours for it.** Edition, chapter length,
+   prerequisites.
 
 ---
 
