@@ -36,7 +36,9 @@ Do not explain loops, conditionals, or what a function is.
 ## Stack
 
 Vanilla HTML, CSS, and JavaScript. No frameworks, no libraries, no build step,
-no package manager. Persistence via `localStorage`. Hosted on GitHub Pages.
+no package manager. Persistence in a Supabase database, reached with plain
+`fetch` against its REST API (no client library). `localStorage` holds only
+the login token. Hosted on GitHub Pages.
 
 Adding a dependency requires an explicit argument. Convenience is not one.
 
@@ -49,6 +51,7 @@ app.js          Application logic
 modules.js      Curriculum reference data
 docs/SPECIFICATION.md
 docs/CURRICULUM-LOG.md   Why the curriculum changed. Read before editing modules.js
+docs/supabase-schema.sql Database tables and access rules. Run in Supabase's SQL Editor
 ```
 
 Four source files. Not one more until splitting them is genuinely painful.
@@ -56,14 +59,14 @@ Four source files. Not one more until splitting them is genuinely painful.
 ## Architectural rules
 
 1. **Nothing derived is ever stored.** Hour totals, progress, averages and
-   streaks are computed on read. If a number can be calculated, it does not go
-   in `localStorage`.
+   streaks are computed on read. If a number can be calculated, it is not
+   stored.
 
 2. **The curriculum is read-only at runtime.** No code path writes to module or
    resource data. It changes by editing `modules.js` and committing.
 
-3. **Two persisted collections only:** sessions and projects. Everything else
-   is static or derived.
+3. **Three persisted collections only:** sessions, projects and completed
+   resources. Everything else is static or derived.
 
 4. **Invalid states are prevented, not validated.** A project session has no
    rating, so the form does not render the control.
@@ -79,9 +82,9 @@ codebase — not as a code generator. Concretely:
    decision is not yet understood.
 
 2. **Name what every choice costs.**
-   There are no free wins. `localStorage` costs cross-device access. No
-   framework costs re-implementing things frameworks give away. A choice
-   presented without its cost is being sold, not explained.
+   There are no free wins. A database costs a login and a network request on
+   every save. No framework costs re-implementing things frameworks give away.
+   A choice presented without its cost is being sold, not explained.
 
 3. **Generalise the principle.**
    Say why this applies beyond the current file, so the lesson transfers to the
@@ -126,7 +129,7 @@ paragraphs that matter.
 - **Everything in English** — code, comments, interface text, documentation,
   commit messages.
 - `camelCase` for variables and functions, `PascalCase` for nothing yet.
-- Dates stored as ISO strings, never as `Date` objects in `localStorage`.
+- Dates stored as ISO strings, never as `Date` objects.
 
 ## Commit messages
 
@@ -142,7 +145,9 @@ Not: `changes`, `fix`, `update`, `wip`.
 
 ## Never committed
 
-- API keys or secrets of any kind
+- API keys or secrets of any kind. One exception: the Supabase **anon** key,
+  which is public by design and protected by grants and row-level security.
+  The **service_role** key is never committed.
 - Editor configuration files
 - Real exported session data
 

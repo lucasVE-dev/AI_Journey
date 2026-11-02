@@ -1,6 +1,11 @@
 # Specification — AI Journey
 
-**Version** 1.0 · **Date** August 2026 · **Status** approved, not yet implemented
+**Version** 1.0, revised · **Date** November 2026 · **Status** approved
+
+This revision moves persistence from `localStorage` to a Supabase database. On
+28 October 2026 the browser storage was found empty, and the export from 24
+October was the only copy left. A store that the browser can clear is not a
+record.
 
 Scope of this document: what version 1.0 must do. Stack and roadmap live in
 `README.md`. Working rules live in `CLAUDE.md`. Curriculum data lives in
@@ -16,7 +21,7 @@ time against planned estimates.
 
 ## Who it is for
 
-A single user: me. No accounts, no login, no permissions.
+A single user: me. One account, mine, with sign-ups disabled. No permissions.
 
 ## Problems it solves
 
@@ -28,8 +33,7 @@ A single user: me. No accounts, no login, no permissions.
 
 ## Out of scope (version 1)
 
-No login. No cross-device sync. No timer. No charts. No notifications. No
-public sharing view.
+No sign-up. No timer. No charts. No notifications. No public sharing view.
 
 Job search is not tracked. This application measures learning, and nothing
 else.
@@ -45,13 +49,16 @@ curriculum that changes weekly is a signal, not a feature.
 Three categories, and the distinction drives the whole design:
 
 - **Static** — modules and resources, read from `modules.js`, never written.
-- **Persisted** — sessions and projects, stored in `localStorage`.
+- **Persisted** — sessions, projects and completed resources, stored in the
+  Supabase database. `localStorage` holds only the login token.
 - **Derived** — every hour total, progress figure, and average rating.
   Never stored.
 
 JavaScript enforces no schema. The shapes below are documented as JSDoc
 typedefs at the top of `app.js` so the editor can catch typos, and validated at
 runtime only on JSON import, where data arrives from outside the application.
+The database enforces the same shapes and rules as constraints, defined in
+`docs/supabase-schema.sql`.
 
 ### Session — the atomic unit
 
@@ -230,8 +237,14 @@ Complete when these work:
 7. Delete a session
 8. Export and import all persisted data as JSON
 
-Item 8 is not optional. With `localStorage`, clearing browser data destroys
-months of records. The export is the insurance.
+Item 8 is not optional. The database is the record; the export is a copy
+that does not depend on any service staying up.
+
+Added by this revision:
+
+9. Sign in with email and password, and sign out
+10. All persisted data read from and written to the database
+11. Import writes to the database, so an export can restore it
 
 Deleting a session requires sessions to be reachable in the interface. How that
 list is presented is an implementation decision, not a specification one.
@@ -240,8 +253,15 @@ list is presented is an implementation decision, not a specification one.
 
 ## Constraints that shape the implementation
 
-- **No backend.** All state lives in the browser, which is why export/import is
-  in scope for v1 rather than deferred.
+- **One backend: Supabase.** Postgres behind its REST API, reached with plain
+  `fetch`. Grants and row-level security let only the signed-in account read
+  or write its own rows, which is what makes a public API key safe to ship in
+  the page.
+- **Online only.** A save without a connection fails with a visible message
+  and changes nothing. There is no offline queue: queuing writes in the
+  browser would rebuild the fragile store this revision replaces.
+- **The screen shows only what the server accepted.** State changes after the
+  request succeeds, never before.
 - **The curriculum is read-only at runtime.** No code path writes to module or
   resource data.
 - **Nothing derived is ever stored.** Totals are computed on read.
