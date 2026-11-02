@@ -31,7 +31,7 @@ This app is both the tool I use daily and the first project of that curriculum.
 | Layer | Choice | Rationale |
 |---|---|---|
 | Frontend | Vanilla HTML, CSS, JavaScript | The app is small. A framework here would be overengineering. |
-| Persistence | `localStorage` + JSON export | No backend to maintain. Migration to Supabase planned for v2. |
+| Persistence | Supabase (Postgres) + JSON export | Browser storage was wiped once; a database survives that and works on any device. Reached with plain `fetch`, no client library. |
 | Hosting | GitHub Pages | Free, deploys on push, public URL. |
 
 No build step, no dependencies, no package manager.
@@ -44,7 +44,8 @@ No build step, no dependencies, no package manager.
 ├── app.js            # Application logic
 ├── modules.js        # Curriculum reference data
 └── docs/
-    └── SPECIFICATION.md
+    ├── SPECIFICATION.md
+    └── supabase-schema.sql
 ```
 
 Curriculum data is kept separate from application logic so the plan can change
@@ -63,10 +64,9 @@ open index.html
 
 ## Roadmap
 
-- [ ] **v1.0** — Session logging, module progress, JSON export _(in progress)_
+- [ ] **v1.0** — Session logging, module progress, JSON export, Supabase storage _(in progress; storage brought forward from v2.0)_
 - [ ] **v1.1** — Edit existing sessions
 - [ ] **v1.2** — Filter by module and date range
-- [ ] **v2.0** — Supabase backend for cross-device sync
 - [ ] **v2.1** — AI-generated summary of recurring blockers
 - [ ] **v3.0** — Public portfolio view with linked projects
 
