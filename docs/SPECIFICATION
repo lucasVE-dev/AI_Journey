@@ -242,7 +242,7 @@ that does not depend on any service staying up.
 
 Added by this revision:
 
-9. Sign in with email and password, and sign out
+9. Sign in with email and password, remembered on each device
 10. All persisted data read from and written to the database
 11. Import writes to the database, so an export can restore it
 

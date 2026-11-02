@@ -51,6 +51,10 @@ const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
 /** Calendar shading bands in minutes. See intensityLevel for the reasoning. */
 const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 150, 180, 210, 240];
 
+/** Supabase login */
+const SUPABASE_URL = "https://alnizgfcazikvasutmuo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_gLk7WkFM9__eiqg0VsAlzA_Xm5LEt6U";
+const AUTH_KEY = "ai-journey-auth";
 
 /* ========== State ========== */
 
@@ -76,6 +80,8 @@ let calendarMonth = new Date();
 /** The resource or project a new session will be attached to. */
 let pendingTarget = null;
 
+/** The current login: tokens from Supabase, or null when signed out. */
+let auth = null;
 
 /* ========== Entry point ==================================================
 
@@ -91,9 +97,15 @@ let pendingTarget = null;
    hoisted usefully — the name exists but throws until its line runs.
    ======================================================================== */
 
+
+loadAuth();
 loadState();
 wireEvents();
 render();
+
+if (auth === null) {
+  document.getElementById("login-dialog").showModal();
+}
 
 
 /* ========== Storage ========== */
@@ -116,6 +128,72 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* ========== Login ========== */
+
+async function signIn(email, password) {
+  const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email: email, password: password })
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const data = await response.json();
+  saveAuth(data);
+  return true;
+}
+
+function saveAuth(data) {
+  const expiresAt = new Date(Date.now() + data.expires_in * 1000);
+
+  auth = {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresAt: expiresAt.toISOString(),
+    email: data.user.email
+  };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+}
+
+function loadAuth() {
+  const stored = localStorage.getItem(AUTH_KEY);
+  if (stored) {
+    auth = JSON.parse(stored);
+  }
+}
+
+async function handleLoginSubmit() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+  const error = document.getElementById("login-error");
+
+  error.hidden = true;
+
+  let signedIn;
+  try {
+    signedIn = await signIn(email, password);
+  } catch (networkError) {
+    error.textContent = "Could not reach the server. Check the connection and try again.";
+    error.hidden = false;
+    return;
+  }
+
+  if (!signedIn) {
+    error.textContent = "Wrong email or password.";
+    error.hidden = false;
+    return;
+  }
+
+  document.getElementById("login-form").reset();
+  document.getElementById("login-dialog").close();
 }
 
 
@@ -1119,5 +1197,18 @@ function wireEvents() {
 
   cancelButton.addEventListener("click", function () {
     closeSessionDialog();
+  });
+
+  const loginForm = document.getElementById("login-form");
+
+  loginForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    handleLoginSubmit();
+  });
+
+  const loginDialog = document.getElementById("login-dialog");
+
+  loginDialog.addEventListener("cancel", function (event) {
+    event.preventDefault();
   });
 }

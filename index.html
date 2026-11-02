@@ -140,6 +140,22 @@
     </form>
   </dialog>
 
+   
+<!-- Signing in. Shown when there is no saved login. --> 
+<dialog id="login-dialog"> 
+  <form id="login-form">
+    <h2>Sign in</h2>
+    <label for="login-email">Email</label>
+    <input type="email" id="login-email" autocomplete="username" required>
+    <label for="login-password">Password</label>
+    <input type="password" id="login-password" autocomplete="current-password" required>
+    <p id="login-error" hidden></p>
+    <div class="dialog-actions">
+      <button type="submit" id="login-submit">Sign in</button>
+    </div>
+  </form>
+</dialog>
+
   <script src="modules.js"></script>
   <script src="app.js"></script>
 </body>
