@@ -99,35 +99,53 @@ let auth = null;
 
 
 loadAuth();
-loadState();
 wireEvents();
 render();
 
 if (auth === null) {
   document.getElementById("login-dialog").showModal();
+} else {
+  loadAndRender();
 }
 
 
 /* ========== Storage ========== */
 
-function loadState() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return;
+async function loadState() {
+  const sessionRows = await fetchTable("sessions");
+  const projectRows = await fetchTable("projects");
+  const completedRows = await fetchTable("completed_resources");
 
-  try {
-    const parsed = JSON.parse(stored);
-    state.sessions = parsed.sessions || [];
-    state.projects = parsed.projects || [];
-    state.completedResources = parsed.completedResources || [];
-  } catch (error) {
-    console.error("Stored data could not be read:", error);
-    // Leave state at its defaults rather than crashing. The stored value is
-    // left untouched so it can be recovered manually if it mattered.
+  state.sessions = [];
+  for (const row of sessionRows) {
+    state.sessions.push(sessionFromRow(row));
+  }
+
+  state.projects = [];
+  for (const row of projectRows) {
+    state.projects.push(projectFromRow(row));
+  }
+
+  state.completedResources = [];
+  for (const row of completedRows) {
+    state.completedResources.push(row.resource_id);
   }
 }
 
+async function loadAndRender() {
+  try {
+    await loadState();
+  } catch (error) {
+    console.error(error);
+    window.alert("Your data could not be loaded: " + error.message);
+    return;
+  }
+  render();
+}
+
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Step 12 replaces this with database writes. Until then it writes nothing,
+  // so testing on this branch cannot overwrite the localStorage copy.
 }
 
 /* ========== Login ========== */
@@ -194,8 +212,162 @@ async function handleLoginSubmit() {
 
   document.getElementById("login-form").reset();
   document.getElementById("login-dialog").close();
+  loadAndRender();
 }
 
+async function getAccessToken() {
+  const msLeft = Date.parse(auth.expiresAt) - Date.now();
+  if (msLeft > 60 * 1000) {
+    return auth.accessToken;
+  }
+
+  const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ refresh_token: auth.refreshToken })
+  });
+
+  if (!response.ok) {
+    auth = null;
+    localStorage.removeItem(AUTH_KEY);
+    document.getElementById("login-dialog").showModal();
+    throw new Error("Login expired. Sign in again.");
+  }
+
+  const data = await response.json();
+  saveAuth(data);
+  return auth.accessToken;
+}
+
+/* ========== Database ========== */
+
+async function fetchTable(table) {
+  const token = await getAccessToken();
+
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + table + "?select=*", {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not read " + table + " (status " + response.status + ").");
+  }
+
+  return response.json();
+}
+
+function sessionFromRow(row) {
+  return {
+    id: row.id,
+    date: row.date,
+    targetType: row.target_type,
+    targetId: row.target_id,
+    minutes: row.minutes,
+    rating: row.rating,
+    notes: row.notes,
+    blocker: row.blocker
+  };
+}
+
+function projectFromRow(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    url: row.url,
+    createdAt: row.created_at
+  };
+}
+
+async function insertRow(table, row) {
+  const token = await getAccessToken();
+
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + table, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(row)
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not save to " + table + " (status " + response.status + ").");
+  }
+}
+
+async function deleteCompletion(resourceId) {
+  const token = await getAccessToken();
+  const filter = "?resource_id=eq." + encodeURIComponent(resourceId);
+
+  const response = await fetch(SUPABASE_URL + "/rest/v1/completed_resources" + filter, {
+    method: "DELETE",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not untick (status " + response.status + ").");
+  }
+}
+
+async function deleteAllRows(table) {
+  const token = await getAccessToken();
+
+  // "user_id is not null" matches every row. RLS narrows it to your own.
+  const filter = "?user_id=not.is.null";
+
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + table + filter, {
+    method: "DELETE",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not clear " + table + " (status " + response.status + ").");
+  }
+}
+
+async function insertRows(table, rows) {
+  if (rows.length === 0) {
+    return;
+  }
+  // Sent as an array, the body becomes one row per element, in one request.
+  await insertRow(table, rows);
+}
+
+function sessionToRow(session) {
+  return {
+    id: session.id,
+    date: session.date,
+    target_type: session.targetType,
+    target_id: session.targetId,
+    minutes: session.minutes,
+    rating: session.rating,
+    notes: session.notes,
+    blocker: session.blocker
+  };
+}
+
+function projectToRow(project) {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    url: project.url,
+    created_at: project.createdAt
+  };
+}
 
 /* ========== Helpers ========== */
 
@@ -278,8 +450,19 @@ function isResourceComplete(resourceId) {
   return state.completedResources.includes(resourceId);
 }
 
-function toggleResourceComplete(resourceId) {
+async function toggleResourceComplete(resourceId) {
   const complete = isResourceComplete(resourceId);
+
+  try {
+    if (complete) {
+      await deleteCompletion(resourceId);
+    } else {
+      await insertRow("completed_resources", { resource_id: resourceId });
+    }
+  } catch (error) {
+    window.alert("The change was not saved: " + error.message);
+    return;
+  }
 
   if (complete) {
     state.completedResources = state.completedResources.filter(
@@ -289,7 +472,6 @@ function toggleResourceComplete(resourceId) {
     state.completedResources.push(resourceId);
   }
 
-  saveState();
   render();
 }
 
@@ -898,7 +1080,7 @@ function readRating() {
   return Number(value);
 }
 
-function saveSessionFromForm() {
+async function saveSessionFromForm() {
   const minutes = Number(document.getElementById("session-minutes").value);
 
   const session = {
@@ -912,8 +1094,20 @@ function saveSessionFromForm() {
     blocker: document.getElementById("session-blocker").value
   };
 
+  const saveButton = document.getElementById("session-save");
+  saveButton.disabled = true;
+
+  try {
+    await insertRow("sessions", sessionToRow(session));
+  } catch (error) {
+    window.alert("The session was not saved: " + error.message);
+    return;
+  } finally {
+    saveButton.disabled = false;
+  }
+
   state.sessions.push(session);
-  saveState();
+  closeSessionDialog();
   render();
 }
 
@@ -933,7 +1127,7 @@ function closeProjectDialog() {
   dialog.close();
 }
 
-function saveProjectFromForm() {
+async function saveProjectFromForm() {
   const project = {
     id: newId(),
     name: document.getElementById("project-name").value,
@@ -942,8 +1136,20 @@ function saveProjectFromForm() {
     createdAt: isoDate(new Date())
   };
 
+  const saveButton = document.getElementById("project-save");
+  saveButton.disabled = true;
+
+  try {
+    await insertRow("projects", projectToRow(project));
+  } catch (error) {
+    window.alert("The project was not saved: " + error.message);
+    return;
+  } finally {
+    saveButton.disabled = false;
+  }
+
   state.projects.push(project);
-  saveState();
+  closeProjectDialog();
   render();
 }
 
@@ -1045,6 +1251,22 @@ function findImportProblems(data) {
   return problems;
 }
 
+/** Gives a new id to any session whose id already appeared earlier in the list. */
+function renewDuplicateSessionIds(sessions) {
+  const seen = new Set();
+  let renewed = 0;
+
+  for (const session of sessions) {
+    if (seen.has(session.id)) {
+      session.id = newId();
+      renewed = renewed + 1;
+    }
+    seen.add(session.id);
+  }
+
+  return renewed;
+}
+
 /**
  * Reading a file takes time, so file.text() hands back a promise rather than
  * the contents. "await" pauses this function until it resolves. The function
@@ -1068,22 +1290,42 @@ async function importData(file) {
     return;
   }
 
-  const sessionCount = data.sessions.length;
-  const projectCount = data.projects.length;
-  const confirmed = window.confirm(
-    "Replace all current data with " + sessionCount + " sessions and " +
-    projectCount + " projects? This cannot be undone."
-  );
+  const renewed = renewDuplicateSessionIds(data.sessions);
 
+  let question = "Replace all data in the database with " + data.sessions.length +
+    " sessions and " + data.projects.length + " projects? This cannot be undone.";
+
+  if (renewed > 0) {
+    question = question + "\n\n" + renewed +
+      " session(s) share an id with an earlier one and will get a new id.";
+  }
+
+  const confirmed = window.confirm(question);
   if (!confirmed) {
     return;
   }
 
-  state.sessions = data.sessions;
-  state.projects = data.projects;
-  state.completedResources = data.completedResources || [];
-  saveState();
-  render();
+  const completed = data.completedResources || [];
+  const completedRows = completed.map(function (resourceId) {
+    return { resource_id: resourceId };
+  });
+
+  try {
+    await deleteAllRows("sessions");
+    await deleteAllRows("projects");
+    await deleteAllRows("completed_resources");
+
+    await insertRows("sessions", data.sessions.map(sessionToRow));
+    await insertRows("projects", data.projects.map(projectToRow));
+    await insertRows("completed_resources", completedRows);
+  } catch (error) {
+    window.alert(
+      "The import stopped: " + error.message +
+      "\n\nThe database may now be partly empty. Your file is unchanged, so import it again."
+    );
+  }
+
+  await loadAndRender();
 }
 
 
@@ -1151,9 +1393,9 @@ function wireEvents() {
 
   const projectForm = document.getElementById("project-form");
 
-  projectForm.addEventListener("submit", function () {
+  projectForm.addEventListener("submit", function (event) {
+    event.preventDefault();
     saveProjectFromForm();
-    closeProjectDialog();
   });
 
   const projectCancel = document.getElementById("project-cancel");
@@ -1188,9 +1430,9 @@ function wireEvents() {
 
   const form = document.getElementById("session-form");
 
-  form.addEventListener("submit", function () {
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
     saveSessionFromForm();
-    closeSessionDialog();
   });
 
   const cancelButton = document.getElementById("session-cancel");
