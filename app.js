@@ -3,7 +3,7 @@
  *
  * Data lives in three categories:
  *   Static     MODULES, from modules.js. Never written.
- *   Persisted  state.sessions and state.projects, in localStorage.
+ *   Persisted  sessions, projects and completed resources, in Supabase.
  *   Derived    every total below. Never stored.
  */
 
@@ -37,7 +37,6 @@ const JOURNEY_START = "2026-08-05";
 const WEEKLY_ON_TRACK_HOURS = 12;   // keeps the curriculum on schedule
 const WEEKLY_TARGET_HOURS = 15;     // the week's actual target
 const WEEKLY_SCALE_HOURS = 20;      // full width of the weekly track
-const STORAGE_KEY = "ai-journey";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -141,11 +140,6 @@ async function loadAndRender() {
     return;
   }
   render();
-}
-
-function saveState() {
-  // Step 12 replaces this with database writes. Until then it writes nothing,
-  // so testing on this branch cannot overwrite the localStorage copy.
 }
 
 /* ========== Login ========== */
