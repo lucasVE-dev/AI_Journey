@@ -284,16 +284,18 @@ section {
    orange past 3 h — the same meaning as the weekly scale, projected onto a day.
    Each level is an upper bound: level 4 is 90-119 min, level 5 is 120-149.
    Band edges: levels 1-4 under 2 h, 5-6 are 2-3 h, 7-9 are 3 h and above.
-   Set by INTENSITY_THRESHOLDS in app.js; the two must stay in step. */
-.cal-day.level-1 { background: #DCE4FA; }
-.cal-day.level-2 { background: #B4C4F5; }
-.cal-day.level-3 { background: #7B95EE; }
-.cal-day.level-4 { background: #3D5FE0; }
-.cal-day.level-5 { background: #12C078; }
-.cal-day.level-6 { background: #0E9A61; }
-.cal-day.level-7 { background: #FFB020; }
-.cal-day.level-8 { background: #FF9F1C; }
-.cal-day.level-9 { background: #F97316; }
+   Set by INTENSITY_THRESHOLDS in app.js; the two must stay in step.
+   Not scoped to .cal-day: the tally swatches in the summary reuse them. */
+.level-0 { background: var(--rule-soft); }
+.level-1 { background: #DCE4FA; }
+.level-2 { background: #B4C4F5; }
+.level-3 { background: #7B95EE; }
+.level-4 { background: #3D5FE0; }
+.level-5 { background: #12C078; }
+.level-6 { background: #0E9A61; }
+.level-7 { background: #FFB020; }
+.level-8 { background: #FF9F1C; }
+.level-9 { background: #F97316; }
 
 .cal-day.level-3 .cal-date,
 .cal-day.level-4 .cal-date,
@@ -310,6 +312,40 @@ section {
 .cal-day.level-7 .cal-hours,
 .cal-day.level-8 .cal-hours,
 .cal-day.level-9 .cal-hours { color: var(--panel); }
+
+
+/* Days per tier since the journey start, at the right end of the summary
+   readouts. Two columns keep it no taller than the readouts beside it.
+   margin-left: auto takes up the spare width, pushing it to the right edge.
+   Doubles as the calendar's legend. */
+.tally {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.375rem 1.25rem;
+  margin-left: auto;
+}
+
+.tally-item {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+}
+
+/* The outline keeps the grey swatch visible against the white panel. */
+.tally-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.tally-name { color: var(--ink-2); }
+
+.tally-count {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
 
 
 /* ===== Projects ========================================================== */
@@ -667,7 +703,9 @@ dialog textarea:focus {
 
   #summary-panel { padding: 1.25rem; }
 
-  .readouts { gap: 1.5rem; }
+  /* No room beside the readouts on a phone, so the tally wraps below them. */
+  .readouts { gap: 1.5rem; flex-wrap: wrap; }
+  .tally { margin-left: 0; }
   .readout--hero .readout-value { font-size: 2.5rem; }
 
   .project,

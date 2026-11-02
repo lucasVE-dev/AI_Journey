@@ -50,6 +50,35 @@ const WEEKDAY_INITIALS = ["M", "T", "W", "T", "F", "S", "S"];
 /** Calendar shading bands in minutes. See intensityLevel for the reasoning. */
 const INTENSITY_THRESHOLDS = [30, 60, 90, 120, 150, 180, 210, 240];
 
+/**
+ * Achievement tiers, highest first: the calendar's nine shades grouped into
+ * seven named bands for the tally beside the summary readouts. Each tier is
+ * an object literal — a C struct with named fields, written inline.
+ *
+ * A tier is defined by the calendar levels it covers, not by its own minute
+ * thresholds. With a single set of thresholds (INTENSITY_THRESHOLDS), a day's
+ * colour and the tier it is counted in cannot disagree.
+ *
+ *   Dark gold   level 9      4 h and up, a stretch goal rather than a pace
+ *   Gold        levels 7-8   3 h to 4 h
+ *   Dark green  level 6      2.5 h to 3 h
+ *   Green       level 5      2 h to 2.5 h
+ *   Dark blue   levels 3-4   1 h to 2 h
+ *   Light blue  levels 1-2   under 1 h
+ *   Grey        level 0      nothing logged
+ *
+ * swatchLevel is the shade shown next to the tier's name in the tally.
+ */
+const ACHIEVEMENT_TIERS = [
+  { id: "dark-gold",  name: "Dark gold",  levels: [9],       swatchLevel: 9 },
+  { id: "gold",       name: "Gold",       levels: [7, 8],    swatchLevel: 7 },
+  { id: "dark-green", name: "Dark green", levels: [6],       swatchLevel: 6 },
+  { id: "green",      name: "Green",      levels: [5],       swatchLevel: 5 },
+  { id: "dark-blue",  name: "Dark blue",  levels: [3, 4],    swatchLevel: 4 },
+  { id: "light-blue", name: "Light blue", levels: [1, 2],    swatchLevel: 2 },
+  { id: "grey",       name: "Grey",       levels: [0],       swatchLevel: 0 }
+];
+
 /** Supabase login */
 const SUPABASE_URL = "https://alnizgfcazikvasutmuo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_gLk7WkFM9__eiqg0VsAlzA_Xm5LEt6U";
@@ -707,6 +736,7 @@ function renderSummary() {
         <span class="readout-value">${daysOnPace()}</span>
         <span class="readout-label">Days on pace</span>
       </div>
+      ${renderTally()}
     </div>
 
     <div class="scales">
@@ -819,6 +849,74 @@ function intensityLevel(minutes) {
   });
 
   return level;
+}
+
+/**
+ * The tier a calendar level belongs to.
+ *
+ * find() takes a function as its argument, calls it on each tier in turn, and
+ * returns the first tier for which it answers true. Every level 0-9 appears in
+ * exactly one tier, so there is always a match.
+ */
+function tierForLevel(level) {
+  return ACHIEVEMENT_TIERS.find(function (tier) {
+    return tier.levels.includes(level);
+  });
+}
+
+/**
+ * How many days fell into each tier, keyed by tier id.
+ *
+ * Counts every day from the journey start to today, so days with nothing
+ * logged show up as grey rather than vanishing. If a session was logged
+ * before JOURNEY_START, the count starts at that session instead, so no
+ * logged day is left out. Future days are not counted: they have not
+ * happened yet, so calling them grey would be wrong.
+ */
+function tierDayCounts() {
+  const counts = {};
+  ACHIEVEMENT_TIERS.forEach(function (tier) {
+    counts[tier.id] = 0;
+  });
+
+  const dayTotals = minutesByDay();
+
+  // ISO dates sort correctly as plain strings, so the earliest is the minimum.
+  const allDates = state.sessions.map(session => session.date);
+  const firstDate = allDates.concat([JOURNEY_START]).sort()[0];
+
+  const cursor = toDateOnly(firstDate);
+  const today = toDateOnly(new Date());
+
+  while (cursor <= today) {
+    const minutes = dayTotals[isoDate(cursor)] || 0;
+    const tier = tierForLevel(intensityLevel(minutes));
+    counts[tier.id] += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return counts;
+}
+
+/**
+ * One swatch and count per tier, in the same order as ACHIEVEMENT_TIERS.
+ * Returns HTML for renderSummary to place, like renderWeeklyScale.
+ */
+function renderTally() {
+  const counts = tierDayCounts();
+
+  const items = ACHIEVEMENT_TIERS.map(function (tier) {
+    const count = counts[tier.id];
+    const unit = count === 1 ? "day" : "days";
+    return `
+      <div class="tally-item">
+        <span class="tally-swatch level-${tier.swatchLevel}"></span>
+        <span class="tally-name">${tier.name}</span>
+        <span class="tally-count">${count} ${unit}</span>
+      </div>
+    `;
+  });
+
+  return `<div class="tally">${items.join("")}</div>`;
 }
 
 function renderCalendar() {
