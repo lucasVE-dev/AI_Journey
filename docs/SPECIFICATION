@@ -244,7 +244,8 @@ Added by this revision:
 
 9. Sign in with email and password, remembered on each device
 10. All persisted data read from and written to the database
-11. Import writes to the database, so an export can restore it
+11. Import adds to the database and never deletes, so an export can restore
+    whatever is missing without touching anything newer
 
 Deleting a session requires sessions to be reachable in the interface. How that
 list is presented is an implementation decision, not a specification one.

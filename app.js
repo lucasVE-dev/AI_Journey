@@ -342,25 +342,6 @@ async function deleteCompletion(resourceId) {
   }
 }
 
-async function deleteAllRows(table) {
-  const token = await getAccessToken();
-
-  // "user_id is not null" matches every row. RLS narrows it to your own.
-  const filter = "?user_id=not.is.null";
-
-  const response = await fetch(SUPABASE_URL + "/rest/v1/" + table + filter, {
-    method: "DELETE",
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + token
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error("Could not clear " + table + " (status " + response.status + ").");
-  }
-}
-
 async function insertRows(table, rows) {
   if (rows.length === 0) {
     return;
@@ -1350,8 +1331,10 @@ function renewDuplicateSessionIds(sessions) {
 
   for (const session of sessions) {
     if (seen.has(session.id)) {
-      session.id = newId();
+      // Built from the original id rather than random, so importing the same
+      // file twice gives the same id, and the second import skips it.
       renewed = renewed + 1;
+      session.id = session.id + "-duplicate-" + renewed;
     }
     seen.add(session.id);
   }
@@ -1384,8 +1367,38 @@ async function importData(file) {
 
   const renewed = renewDuplicateSessionIds(data.sessions);
 
-  let question = "Replace all data in the database with " + data.sessions.length +
-    " sessions and " + data.projects.length + " projects? This cannot be undone.";
+  // Read the database again instead of trusting what this tab shows.
+  // The tab may have been open for days; the database is the record.
+  try {
+    await loadState();
+  } catch (error) {
+    window.alert("Could not read the database, so nothing was imported: " + error.message);
+    return;
+  }
+
+  const sessionIds = new Set(state.sessions.map(session => session.id));
+  const projectIds = new Set(state.projects.map(project => project.id));
+  const completed = data.completedResources || [];
+
+  const newSessions = data.sessions.filter(session => !sessionIds.has(session.id));
+  const newProjects = data.projects.filter(project => !projectIds.has(project.id));
+  const newTicks = completed.filter(
+    resourceId => !state.completedResources.includes(resourceId)
+  );
+
+  const newCount = newSessions.length + newProjects.length + newTicks.length;
+  const fileCount = data.sessions.length + data.projects.length + completed.length;
+
+  if (newCount === 0) {
+    window.alert("Everything in this file is already in the database. Nothing was added.");
+    render();
+    return;
+  }
+
+  let question = "Add " + newSessions.length + " sessions, " + newProjects.length +
+    " projects and " + newTicks.length + " ticked resources to the database?\n\n" +
+    "Nothing is deleted. Rows already in the database are skipped: " +
+    (fileCount - newCount) + ".";
 
   if (renewed > 0) {
     question = question + "\n\n" + renewed +
@@ -1394,26 +1407,22 @@ async function importData(file) {
 
   const confirmed = window.confirm(question);
   if (!confirmed) {
+    render();
     return;
   }
 
-  const completed = data.completedResources || [];
-  const completedRows = completed.map(function (resourceId) {
+  const tickRows = newTicks.map(function (resourceId) {
     return { resource_id: resourceId };
   });
 
   try {
-    await deleteAllRows("sessions");
-    await deleteAllRows("projects");
-    await deleteAllRows("completed_resources");
-
-    await insertRows("sessions", data.sessions.map(sessionToRow));
-    await insertRows("projects", data.projects.map(projectToRow));
-    await insertRows("completed_resources", completedRows);
+    await insertRows("projects", newProjects.map(projectToRow));
+    await insertRows("sessions", newSessions.map(sessionToRow));
+    await insertRows("completed_resources", tickRows);
   } catch (error) {
     window.alert(
       "The import stopped: " + error.message +
-      "\n\nThe database may now be partly empty. Your file is unchanged, so import it again."
+      "\n\nNothing was deleted. Import the same file again to add the rest."
     );
   }
 
