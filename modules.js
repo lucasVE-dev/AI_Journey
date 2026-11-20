@@ -79,9 +79,9 @@ const MODULES = [
       },
       {
         id: "01-r3",
-        name: "Git — branching and pull requests",
-        url: "https://learngitbranching.js.org",
-        description: "Just the introduction sequence: branch, merge, a pull request on GitHub. This module's own deliverable needs a branch and a PR, so that much can't wait for the job. Skip rebase and the advanced sequences — a real conflict on real work teaches those faster than a simulator does.",
+        name: "Pro Git — ch. 3 Git Branching",
+        url: "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell",
+        description: "Sections 3.1 to 3.7, all of them. Branches as pointers to commits, HEAD, fast-forward and three-way merges, conflicts, remote branches, rebasing — each command shown with a diagram of what it did to the history. The book does not cover pull requests; those are practised on this repository's own work, where every feature already goes through one.",
         plannedHours: 3
       },
       {

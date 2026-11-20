@@ -23,6 +23,20 @@ mistake.
 
 ---
 
+## 2026-11-20 — Git resource replaced with Pro Git
+
+- **Learn Git Branching replaced with Pro Git ch. 3 (`01-r3`).** The
+  simulator's explanations were unclear and its exercises run in a fake
+  shell. Pro Git shows a diagram of the history for every command. Sections
+  3.1 to 3.7 were read in full before the plan was changed.
+- **Rebase no longer skipped.** Section 3.6 was read with the rest of the
+  chapter.
+- **The old description was wrong.** Learn Git Branching has no pull
+  requests. They are learned on this repository instead, where every feature
+  already goes through one.
+- **ID `01-r3` kept.** Same topic, new source, so hours already logged
+  against it stay attached.
+
 ## 2026-10-20 — Full review against live resources and the market
 
 - **End date moved from May to August 2027.** About 450h remain, which needs
